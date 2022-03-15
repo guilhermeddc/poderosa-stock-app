@@ -15,6 +15,7 @@ import {
   useTheme,
 } from '@mui/material';
 import {IMenuOptions} from 'shared/context/Drawer';
+import {useAuth} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
 
 import {drawerWidth, MuiDrawer, MuiIcon} from '../styles';
@@ -38,6 +39,8 @@ export const Drawer: React.FC<IProps> = ({
   const [filter, setFilter] = useState('');
   const [menuSelected, setMenuSelected] = useState<IMenuOptions[]>([]);
   const [menuFather, setMenuFather] = useState({} as IMenuOptions);
+
+  const {signOut} = useAuth();
   const theme = useTheme();
 
   const filteredMenuOptions: IMenuOptions[] = useMemo(() => {
@@ -186,6 +189,7 @@ export const Drawer: React.FC<IProps> = ({
 
           <ListItem
             button
+            onClick={signOut}
             sx={{
               height: theme.spacing(7),
               color: theme.palette.secondary.contrastText,

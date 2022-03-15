@@ -22,8 +22,6 @@ export const BaseLayout: React.FC = ({children}) => {
         drawerOpen={drawerOpen}
         buttonActive={buttonActive}
         setButtonActive={setButtonActive}
-        userName={'GVdasa'}
-        userAvatar={'GV'}
       />
 
       <Drawer

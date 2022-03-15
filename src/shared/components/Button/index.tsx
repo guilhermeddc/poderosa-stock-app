@@ -2,6 +2,8 @@ import React from 'react';
 
 import {Button as MuiButton, ButtonProps} from '@mui/material';
 
+import {CircularProgress} from './styles';
+
 interface IProps extends ButtonProps {
   label?: string;
   variant?: 'contained' | 'outlined' | 'text';
@@ -18,6 +20,7 @@ interface IProps extends ButtonProps {
   size?: 'small' | 'medium' | 'large';
   textTransform?: 'uppercase' | 'lowercase' | 'capitalize' | 'none';
   minWidth?: number;
+  loading?: boolean;
 }
 
 export const Button: React.FC<IProps> = ({
@@ -29,6 +32,7 @@ export const Button: React.FC<IProps> = ({
   textTransform = 'none',
   error = false,
   minWidth = 120,
+  loading = false,
   ...props
 }) => {
   return (
@@ -44,6 +48,7 @@ export const Button: React.FC<IProps> = ({
         minWidth: minWidth,
       }}>
       {label}
+      {loading && <CircularProgress size={24} />}
       {children}
     </MuiButton>
   );

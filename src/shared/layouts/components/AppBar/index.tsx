@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import {logoRet} from 'shared/assets';
 import {Button} from 'shared/components';
-import {useTitle} from 'shared/hooks';
+import {useAuth, useTitle} from 'shared/hooks';
 
 import {MuiAppBar} from '../styles';
 
@@ -35,8 +35,6 @@ interface IProps {
   buttonActive: boolean;
   handleDrawerOpen(): void;
   setButtonActive(value: boolean): void;
-  userName: string;
-  userAvatar: string;
 }
 
 export const AppBar: React.FC<IProps> = ({
@@ -44,8 +42,6 @@ export const AppBar: React.FC<IProps> = ({
   buttonActive,
   setButtonActive,
   handleDrawerOpen,
-  userName,
-  userAvatar,
 }) => {
   const [anchorElNotify, setAnchorElNotify] = useState<null | HTMLElement>(
     null,
@@ -57,6 +53,7 @@ export const AppBar: React.FC<IProps> = ({
   const openProfileMenu = Boolean(anchorElProfile);
 
   const {title} = useTitle();
+  const {user} = useAuth();
   const theme = useTheme();
 
   const handleClickNotifyMenu = useCallback(
@@ -221,9 +218,16 @@ export const AppBar: React.FC<IProps> = ({
             aria-haspopup="true"
             aria-expanded={openProfileMenu ? 'true' : undefined}>
             <Box gap={2} display="flex" alignItems="center">
-              <Avatar>{userAvatar}</Avatar>
+              {user.photoURL && user.displayName ? (
+                <Avatar alt={user.displayName} src={user.photoURL} />
+              ) : (
+                <Avatar>
+                  {`${user.displayName?.split(' ')[0][0]}
+              ${user.displayName?.split(' ')[1][0]}`}
+                </Avatar>
+              )}
               <Typography>
-                Olá, <strong>{userName}</strong>
+                Olá, <strong>{user.displayName}</strong>
               </Typography>
             </Box>
           </Button>
