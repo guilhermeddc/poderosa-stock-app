@@ -14,12 +14,15 @@ import {db} from 'shared/services/firebase';
 
 export interface IProduct {
   id: string;
-  cod: string;
-  name: string;
-  provider: string;
-  quantity: number;
+  code: string;
+  description: string;
+  purchaseValue: number;
+  saleValue: number;
+  profitValue: number;
   size: string;
-  price: string;
+  seller: string;
+  sold: boolean;
+  travel: string;
 }
 
 const productDB = collection(db, 'products');
@@ -30,12 +33,15 @@ const getProducts = async (): Promise<IProduct[]> => {
     const productList = productSnapshot.docs.map((doc) => {
       return {
         id: doc.id,
-        cod: doc.data().cod,
-        name: doc.data().name,
-        provider: doc.data().provider,
-        quantity: doc.data().quantity,
+        code: doc.data().code,
+        description: doc.data().description,
+        purchaseValue: doc.data().purchaseValue,
+        saleValue: doc.data().saleValue,
+        profitValue: doc.data().profitValue,
         size: doc.data().size,
-        price: doc.data().price,
+        seller: doc.data().seller,
+        sold: doc.data().sold,
+        travel: doc.data().travel,
       };
     });
 
@@ -64,7 +70,7 @@ const createProduct = async (
 ): Promise<IRequestResult> => {
   try {
     const codExists = await getDocs(
-      query(productDB, where('cod', '==', payload.cod)),
+      query(productDB, where('cod', '==', payload.code)),
     );
 
     if (codExists.docs.map((doc) => doc.data()).length > 0) {

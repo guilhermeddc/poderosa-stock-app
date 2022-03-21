@@ -1,5 +1,6 @@
 import React from 'react';
 
+import {Paper} from '@mui/material';
 import {
   DataGrid as MuiDataGrid,
   GridColDef,
@@ -53,15 +54,17 @@ export const DataGrid: React.FC<IProps> = ({
   ...rest
 }) => {
   return (
-    <MuiDataGrid
-      rows={rows}
-      columns={columns}
-      pageSize={pageSize}
-      checkboxSelection={checkboxSelection}
-      disableSelectionOnClick
-      autoHeight
-      localeText={localizedTextsMap}
-      {...rest}
-    />
+    <Paper>
+      <MuiDataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={pageSize}
+        checkboxSelection={checkboxSelection}
+        disableSelectionOnClick
+        autoHeight
+        localeText={localizedTextsMap}
+        {...rest}
+      />
+    </Paper>
   );
 };

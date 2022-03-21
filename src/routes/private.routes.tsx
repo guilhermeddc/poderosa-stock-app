@@ -4,7 +4,9 @@ import {Routes, Route, Navigate} from 'react-router-dom';
 import {Box, CircularProgress} from '@mui/material';
 import {BaseLayout} from 'shared/layouts';
 
-const HomeLazy = lazy(() => import('pages/Home'));
+const Home = lazy(() => import('pages/Home'));
+const Product = lazy(() => import('pages/Product'));
+const Sellers = lazy(() => import('pages/Sellers'));
 
 export const PrivateRoutes: React.FC = () => {
   return (
@@ -21,9 +23,11 @@ export const PrivateRoutes: React.FC = () => {
           </Box>
         }>
         <Routes>
-          <Route path="/" element={<HomeLazy />} />
+          <Route path="/" element={<Home />} />
+          <Route path="produtos" element={<Product />} />
+          <Route path="vendedores" element={<Sellers />} />
 
-          <Route path="*" element={() => <Navigate to="/" />} />
+          <Route path="*" element={() => <Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </BaseLayout>

@@ -28,7 +28,7 @@ export const Button: React.FC<IProps> = ({
   children,
   variant = 'contained',
   color = 'primary',
-  size = 'medium',
+  size = 'large',
   textTransform = 'none',
   error = false,
   minWidth = 120,

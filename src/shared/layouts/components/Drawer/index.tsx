@@ -138,7 +138,7 @@ export const Drawer: React.FC<IProps> = ({
           </ListItem>
         </Box>
 
-        <List sx={{position: 'relative', top: 146, height: '80%'}}>
+        <List sx={{position: 'relative', top: 154, height: '80%'}}>
           {menuSelected.length === 0 ? (
             menuOptions &&
             filteredMenuOptions?.map((item) => (

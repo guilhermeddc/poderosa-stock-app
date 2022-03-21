@@ -1,8 +1,9 @@
-import React, {createContext, useCallback, useState} from 'react';
+import React, {createContext, useCallback, useEffect, useState} from 'react';
 
-import {User} from '@firebase/auth';
+import {User, onAuthStateChanged} from 'firebase/auth';
 import {feedback} from 'shared/services/alertService';
 import {authService} from 'shared/services/api/auth';
+import {auth} from 'shared/services/firebase';
 
 export interface IAuthContext {
   authenticated: boolean;
@@ -37,6 +38,12 @@ export const AuthProvider: React.FC = ({children}) => {
     } catch (error) {
       feedback(String(error), 'error');
     }
+  }, []);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setUser(user as User);
+    });
   }, []);
 
   return (

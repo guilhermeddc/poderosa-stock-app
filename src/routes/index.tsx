@@ -9,6 +9,9 @@ import {PublicRoutes} from './public.routes';
 export const Routes: React.FC = () => {
   const {authenticated} = useAuth();
 
+  // eslint-disable-next-line
+  console.log('*** authenticated', authenticated);
+
   const Routes = authenticated ? PrivateRoutes : PublicRoutes;
 
   return (

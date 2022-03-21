@@ -25,17 +25,17 @@ export const Login: React.FC = () => {
           backgroundPosition: 'center',
         }}
       />
+
       <Grid item xs={12} sm={8} md={4} component={Paper} elevation={6} square>
         <Box
           sx={{
-            my: 8,
-            mx: 4,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
             height: '100%',
           }}>
-          <Box sx={{mt: 5}}>
+          <Box>
             <img src={logo} alt="logo poderosa stock" width={350} />
           </Box>
 
@@ -50,7 +50,7 @@ export const Login: React.FC = () => {
               </Box>
             </Button>
 
-            <Box sx={{mt: 5}}>
+            <Box sx={{mt: 5, mb: 5}}>
               <Copyright />
             </Box>
           </Box>

@@ -1,8 +1,6 @@
 import React, {useCallback, useState} from 'react';
 
 import {
-  Edit,
-  ExpandMoreRounded,
   MenuOpenRounded,
   MenuRounded,
   NotificationsOutlined,
@@ -25,7 +23,6 @@ import {
   useTheme,
 } from '@mui/material';
 import {logoRet} from 'shared/assets';
-import {Button} from 'shared/components';
 import {useAuth, useTitle} from 'shared/hooks';
 
 import {MuiAppBar} from '../styles';
@@ -47,10 +44,6 @@ export const AppBar: React.FC<IProps> = ({
     null,
   );
   const openNotifyMenu = Boolean(anchorElNotify);
-  const [anchorElProfile, setAnchorElProfile] = useState<null | HTMLElement>(
-    null,
-  );
-  const openProfileMenu = Boolean(anchorElProfile);
 
   const {title} = useTitle();
   const {user} = useAuth();
@@ -65,17 +58,6 @@ export const AppBar: React.FC<IProps> = ({
 
   const handleCloseNotifyMenu = useCallback(() => {
     setAnchorElNotify(null);
-  }, []);
-
-  const handleClickProfileMenu = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      setAnchorElProfile(event.currentTarget);
-    },
-    [],
-  );
-
-  const handleCloseProfileMenu = useCallback(() => {
-    setAnchorElProfile(null);
   }, []);
 
   const handleOpenMenu = useCallback(() => {
@@ -209,42 +191,19 @@ export const AppBar: React.FC<IProps> = ({
 
           <Box ml={1} height={16} width="1px" bgcolor="#B3DBD9" />
 
-          <Button
-            id="profile-button"
-            disableElevation
-            onClick={handleClickProfileMenu}
-            endIcon={<ExpandMoreRounded />}
-            aria-controls={openProfileMenu ? 'profile-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={openProfileMenu ? 'true' : undefined}>
-            <Box gap={2} display="flex" alignItems="center">
-              {user.photoURL && user.displayName ? (
-                <Avatar alt={user.displayName} src={user.photoURL} />
-              ) : (
-                <Avatar>
-                  {`${user.displayName?.split(' ')[0][0]}
+          <Box gap={2} display="flex" alignItems="center">
+            {user.photoURL && user.displayName ? (
+              <Avatar alt={user.displayName} src={user.photoURL} />
+            ) : (
+              <Avatar>
+                {`${user.displayName?.split(' ')[0][0]}
               ${user.displayName?.split(' ')[1][0]}`}
-                </Avatar>
-              )}
-              <Typography>
-                Olá, <strong>{user.displayName}</strong>
-              </Typography>
-            </Box>
-          </Button>
-
-          <Menu
-            id="profile-menu"
-            MenuListProps={{
-              'aria-labelledby': 'profile-button',
-            }}
-            anchorEl={anchorElProfile}
-            open={openProfileMenu}
-            onClose={handleCloseProfileMenu}>
-            <MenuItem onClick={handleCloseProfileMenu} disableRipple>
-              <Edit />
-              Edit
-            </MenuItem>
-          </Menu>
+              </Avatar>
+            )}
+            <Typography>
+              Olá, <strong>{user.displayName}</strong>
+            </Typography>
+          </Box>
         </Grid>
       </Grid>
     </MuiAppBar>

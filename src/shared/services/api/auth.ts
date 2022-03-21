@@ -1,7 +1,10 @@
 import {collection, getDocs} from '@firebase/firestore/lite';
 import {
   GoogleAuthProvider,
+  inMemoryPersistence,
+  setPersistence,
   signInWithPopup,
+  signInWithRedirect,
   signOut as FSignOut,
   User,
 } from 'firebase/auth';
@@ -37,6 +40,9 @@ const signIn = async (): Promise<IUser> => {
 
     const admin = await isAdmin(resUser.user.uid);
 
+    // eslint-disable-next-line
+    console.log('*** {user, admin}', {user, admin});
+
     return {user, admin};
   } catch (error: any) {
     const errorCode = error.code;
@@ -57,7 +63,22 @@ const signOut = async () => {
   }
 };
 
+const signPersist = async () => {
+  try {
+    await setPersistence(auth, inMemoryPersistence);
+
+    const provider = new GoogleAuthProvider();
+
+    return signInWithRedirect(auth, provider);
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
 export const authService = {
   signIn,
   signOut,
+  signPersist,
 };
