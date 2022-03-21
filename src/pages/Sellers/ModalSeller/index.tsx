@@ -65,8 +65,7 @@ export const ModalSeller: React.FC<IProps> = ({
       labelCloseButton="Fechar"
       labelSaveButton="Salvar">
       <Form ref={formRef} onSubmit={handleOnSubmit} initialData={initialData}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} />
+        <Grid container spacing={3}>
           <Grid item xs={12}>
             <TextField name="name" label="Nome" />
           </Grid>
@@ -75,7 +74,7 @@ export const ModalSeller: React.FC<IProps> = ({
             <TextField name="email" label="E-mail" />
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
             <NumberFormat
               fullWidth
               name="cpf"
@@ -85,7 +84,7 @@ export const ModalSeller: React.FC<IProps> = ({
             />
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
             <NumberFormat
               fullWidth
               name="phone"

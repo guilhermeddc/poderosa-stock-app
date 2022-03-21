@@ -12,6 +12,7 @@ import {
   ListItemText,
   TextField,
   Toolbar,
+  useMediaQuery,
   useTheme,
 } from '@mui/material';
 import {IMenuOptions} from 'shared/context/Drawer';
@@ -42,6 +43,7 @@ export const Drawer: React.FC<IProps> = ({
 
   const {signOut} = useAuth();
   const theme = useTheme();
+  const matches = useMediaQuery('(min-width:600px)');
 
   const filteredMenuOptions: IMenuOptions[] = useMemo(() => {
     if (menuOptions) {
@@ -74,7 +76,7 @@ export const Drawer: React.FC<IProps> = ({
           zIndex={theme.zIndex.drawer + 1}
           sx={{
             backgroundColor: theme.palette.primary.main,
-            width: drawerOpen ? drawerWidth : theme.spacing(9),
+            width: drawerOpen ? drawerWidth : matches ? theme.spacing(9) : 0,
             boxShadow: theme.shadows[12],
             transition: drawerOpen
               ? theme.transitions.create('width', {
@@ -138,7 +140,7 @@ export const Drawer: React.FC<IProps> = ({
           </ListItem>
         </Box>
 
-        <List sx={{position: 'relative', top: 154, height: '80%'}}>
+        <List sx={{position: 'relative', top: 156, height: '80%'}}>
           {menuSelected.length === 0 ? (
             menuOptions &&
             filteredMenuOptions?.map((item) => (

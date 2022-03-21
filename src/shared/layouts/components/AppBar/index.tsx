@@ -20,6 +20,7 @@ import {
   Menu,
   MenuItem,
   Typography,
+  useMediaQuery,
   useTheme,
 } from '@mui/material';
 import {logoRet} from 'shared/assets';
@@ -48,6 +49,7 @@ export const AppBar: React.FC<IProps> = ({
   const {title} = useTitle();
   const {user} = useAuth();
   const theme = useTheme();
+  const matches = useMediaQuery('(min-width:600px)');
 
   const handleClickNotifyMenu = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -94,9 +96,11 @@ export const AppBar: React.FC<IProps> = ({
                 </IconButton>
               </ListItemIcon>
 
-              <Box ml={4} mr={2} height={16} width="1px" bgcolor="#B3DBD9" />
+              {matches && (
+                <Box ml={4} mr={2} height={16} width="1px" bgcolor="#B3DBD9" />
+              )}
 
-              <img src={logoRet} alt="GVCentris" height={30} />
+              <img src={logoRet} alt="GVCentris" height={32} />
 
               <Typography variant="h6" sx={{marginLeft: theme.spacing(2)}}>
                 {title}
@@ -125,7 +129,7 @@ export const AppBar: React.FC<IProps> = ({
           </IconButton>
 
           <Menu
-            sx={{mt: 3, left: -100, maxWidth: 350}}
+            sx={{mt: 3, left: matches ? -100 : 0, maxWidth: 350}}
             id="notify-menu"
             MenuListProps={{
               'aria-labelledby': 'notify-button',
@@ -200,9 +204,11 @@ export const AppBar: React.FC<IProps> = ({
               ${user.displayName?.split(' ')[1][0]}`}
               </Avatar>
             )}
-            <Typography>
-              Olá, <strong>{user.displayName}</strong>
-            </Typography>
+            {matches && (
+              <Typography>
+                Olá, <strong>{user.displayName}</strong>
+              </Typography>
+            )}
           </Box>
         </Grid>
       </Grid>

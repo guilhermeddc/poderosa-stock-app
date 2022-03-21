@@ -5,9 +5,8 @@ import {
   DialogContent,
   Dialog,
   Typography,
-  CircularProgress,
   Box,
-  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 
 import {Button} from '../Button';
@@ -36,53 +35,41 @@ export const Modal: React.FC<IProps> = ({
   labelSaveButton,
   onClick,
 }) => {
-  const theme = useTheme();
+  const matches = useMediaQuery('(min-width:600px)');
 
   return (
     <Dialog open={opened} onClose={onClose} maxWidth={maxWidth} fullWidth>
       {title && (
-        <Typography
-          variant="h6"
-          color="primary"
-          style={{
-            padding: '32px 24px 0',
-          }}>
-          <strong>{title}</strong>
-        </Typography>
+        <Box p={3}>
+          <Typography variant="h6" fontWeight={500} color="primary">
+            {title}
+          </Typography>
+        </Box>
       )}
       <DialogContent>{children}</DialogContent>
       {(labelSaveButton || labelCloseButton) && (
         <DialogActions
-          style={{
-            padding: '8px 24px 32px',
+          sx={{
+            p: 3,
           }}>
           {labelCloseButton && (
             <Button
               variant="outlined"
+              fullWidth={!matches}
               disabled={loading}
-              label={labelCloseButton}
               onClick={onClose}
+              label={labelCloseButton}
             />
           )}
-          <Box marginLeft={1} />
+          <Box marginLeft={2} />
           {labelSaveButton && (
             <Button
               label={labelSaveButton}
+              fullWidth={!matches}
               onClick={onClick}
-              disabled={loading || disabled}>
-              {loading && (
-                <CircularProgress
-                  size={24}
-                  sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    marginTop: -theme.spacing(1.5),
-                    marginLeft: -theme.spacing(1.5),
-                  }}
-                />
-              )}
-            </Button>
+              loading={loading}
+              disabled={loading || disabled}
+            />
           )}
         </DialogActions>
       )}

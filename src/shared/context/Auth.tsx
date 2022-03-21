@@ -1,9 +1,8 @@
 import React, {createContext, useCallback, useEffect, useState} from 'react';
 
-import {User, onAuthStateChanged} from 'firebase/auth';
+import {User} from 'firebase/auth';
 import {feedback} from 'shared/services/alertService';
 import {authService} from 'shared/services/api/auth';
-import {auth} from 'shared/services/firebase';
 
 export interface IAuthContext {
   authenticated: boolean;
@@ -23,6 +22,9 @@ export const AuthProvider: React.FC = ({children}) => {
     try {
       const response = await authService.signIn();
 
+      localStorage.setItem('@user', JSON.stringify(response.user));
+      localStorage.setItem('@admin', JSON.stringify(response.admin));
+
       setUser(response.user);
       setIsAdmin(response.admin);
     } catch (error) {
@@ -41,9 +43,11 @@ export const AuthProvider: React.FC = ({children}) => {
   }, []);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      setUser(user as User);
-    });
+    const userStorage = localStorage.getItem('@user');
+    const adminStorage = localStorage.getItem('@admin');
+
+    userStorage && setUser(JSON.parse(userStorage) as User);
+    adminStorage && setIsAdmin(!!JSON.parse(adminStorage));
   }, []);
 
   return (

@@ -1,8 +1,21 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
-import {Grid, IconButton, Stack, Tooltip, Typography} from '@mui/material';
-import {Button, DataGrid, FilterData, ModalConfirm} from 'shared/components';
+import {
+  Grid,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
+import {
+  Button,
+  DataGrid,
+  FilterData,
+  InputSearch,
+  ModalConfirm,
+} from 'shared/components';
 import {cpfMask, phoneMask} from 'shared/helpers/masks';
 import {feedback} from 'shared/services/alertService';
 import {ISeller, sellerService} from 'shared/services/api/seller';
@@ -11,11 +24,14 @@ import {ModalSeller} from './ModalSeller';
 
 export const Sellers: React.FC = () => {
   const [data, setData] = useState<ISeller[]>([]);
+  const [filter, setFilter] = useState('');
   const [seller, setSeller] = useState<ISeller | undefined>();
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
+
+  const matches = useMediaQuery('(min-width:600px)');
 
   const getData = useCallback(async () => {
     try {
@@ -76,17 +92,31 @@ export const Sellers: React.FC = () => {
     setOpenModalConfirmExclude(false);
   }, [getData, idDeleted]);
 
+  const filteredData = useMemo(() => {
+    if (data) {
+      return data.filter(
+        (item) =>
+          item.name.toLowerCase().includes(filter.toLowerCase()) ||
+          item.cpf.toLowerCase().includes(filter.toLowerCase()),
+      );
+    }
+    return [];
+  }, [data, filter]);
+
   return (
     <>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography fontWeight={400} variant="h4" color="primary">
-              Gestão de vendedores
-            </Typography>
+        <Grid item xs={12} sm={6}>
+          <Typography fontWeight={400} variant="h4" color="primary">
+            Gestão de vendedores
+          </Typography>
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
+          <Stack direction="row" justifyContent="flex-end">
             <Button
-              label="Adicionar nova"
+              fullWidth={!matches}
+              label="Adicionar"
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => setOpenModal(true)}
@@ -96,7 +126,13 @@ export const Sellers: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <FilterData />
+          <FilterData>
+            <InputSearch
+              placeholder="Pesquisar por nome ou CPF..."
+              value={filter}
+              onChange={({target}) => setFilter(target.value)}
+            />
+          </FilterData>
         </Grid>
 
         <Grid item xs={12}>
@@ -157,7 +193,7 @@ export const Sellers: React.FC = () => {
                 renderCell: (params) => phoneMask(params.row.phone),
               },
             ]}
-            rows={data}
+            rows={filteredData}
           />
         </Grid>
       </Grid>

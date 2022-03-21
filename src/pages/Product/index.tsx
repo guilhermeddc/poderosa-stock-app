@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {AddRounded} from '@mui/icons-material';
-import {Grid, Stack, Typography} from '@mui/material';
-import {Button, DataGrid} from 'shared/components';
+import {Grid, Stack, Typography, useMediaQuery} from '@mui/material';
+import {Button, DataGrid, FilterData, InputSearch} from 'shared/components';
 import {feedback} from 'shared/services/alertService';
 import {IProduct, productService} from 'shared/services/api/product';
 
@@ -10,8 +10,11 @@ import {ModalProduct} from './components/ModalProduct';
 
 export const Product: React.FC = () => {
   const [data, setData] = useState<IProduct[]>([]);
+  const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+
+  const matches = useMediaQuery('(min-width:600px)');
 
   const getData = useCallback(async () => {
     try {
@@ -31,26 +34,57 @@ export const Product: React.FC = () => {
     getData();
   }, [getData]);
 
-  // eslint-disable-next-line
-  console.log('*** data', data);
+  const filteredData = useMemo(() => {
+    if (data) {
+      return data.filter(
+        (item) =>
+          item.description.toLowerCase().includes(filter.toLowerCase()) ||
+          item.code.toLowerCase().includes(filter.toLowerCase()),
+      );
+    }
+    return [];
+  }, [data, filter]);
 
   return (
     <>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography fontWeight={600} variant="h4" color="primary">
-              Produtos
-            </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6}>
+          <Typography fontWeight={400} variant="h4" color="primary">
+            Gestão de produtos
+          </Typography>
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
+          <Stack direction="row" justifyContent="flex-end">
             <Button
-              label="Adicionar novo"
+              fullWidth={!matches}
+              label="Adicionar"
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => setOpenModal(true)}
               disabled={loading}
             />
           </Stack>
+        </Grid>
+
+        <Grid item xs={12}>
+          <FilterData>
+            <InputSearch
+              placeholder="Pesquisar por código ou descrição..."
+              value={filter}
+              onChange={({target}) => setFilter(target.value)}
+            />
+          </FilterData>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography
+            fontWeight={400}
+            variant="h6"
+            textTransform="uppercase"
+            color="primary">
+            Produtos
+          </Typography>
         </Grid>
 
         <Grid item xs={12}>
@@ -93,7 +127,7 @@ export const Product: React.FC = () => {
                 headerName: 'Vendedor',
               },
             ]}
-            rows={data}
+            rows={filteredData}
           />
         </Grid>
       </Grid>

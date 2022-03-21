@@ -8,7 +8,7 @@ import {
   Theme,
 } from '@mui/material';
 
-export const drawerWidth = 360;
+export const drawerWidth = 300;
 
 const openedMixin = (theme: Theme): CSSObject => ({
   backgroundColor: theme.palette.primary.main,
@@ -27,9 +27,9 @@ const closedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(9)} + 1px)`,
+  width: `calc(${theme.spacing(9)} + 1px)`,
+  [theme.breakpoints.only('xs')]: {
+    width: 0,
   },
 });
 
