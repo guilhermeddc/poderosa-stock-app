@@ -60,6 +60,7 @@ export const NumberFormat: React.FC<TVTextFieldProps> = ({
       error={!!error}
       helperText={error}
       onValueChange={({value}) => handleChange(value)}
+      style={{minWidth: '100%'}}
     />
   );
 };

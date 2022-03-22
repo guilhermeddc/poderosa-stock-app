@@ -10,6 +10,7 @@ import {
   useTheme,
 } from '@mui/material';
 import {IMenuOptions} from 'shared/context/Drawer';
+import {useDrawer} from 'shared/hooks';
 
 import {MuiIcon} from '../../styles';
 
@@ -21,6 +22,7 @@ interface IProps {
 
 export const MenuItem: React.FC<IProps> = ({menuItem, onClick, drawerOpen}) => {
   const theme = useTheme();
+  const {setDrawerOpen} = useDrawer();
 
   return menuItem.subMenu ? (
     <ListItem
@@ -53,6 +55,7 @@ export const MenuItem: React.FC<IProps> = ({menuItem, onClick, drawerOpen}) => {
       button
       key={menuItem.id}
       to={menuItem.path}
+      onClick={() => setDrawerOpen(false)}
       component={NavLink as any}
       style={
         (({isActive}: any) =>

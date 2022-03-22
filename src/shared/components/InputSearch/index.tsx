@@ -8,6 +8,7 @@ export const InputSearch: React.FC<TextFieldProps> = ({...props}) => {
     <TextField
       fullWidth
       variant="outlined"
+      label="Pesquisar"
       {...props}
       InputProps={{
         endAdornment: (

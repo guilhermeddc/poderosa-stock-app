@@ -11,6 +11,9 @@ export * from './InputSearch';
 export * from './Header';
 export * from './Copyright';
 export * from './FilterData';
+export * from './LinearDeterminate';
+export * from './Title';
+export * from './Subtitle';
 
 export * from './Form/Checkbox';
 export * from './Form/MultiSelect';

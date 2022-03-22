@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Box, Typography} from '@mui/material';
+import {Typography} from '@mui/material';
 
 import {Modal} from '../Modal';
 
@@ -35,13 +35,11 @@ export const ModalConfirm: React.FC<IProps> = ({
         labelSaveButton={labelSaveButton}
         labelCloseButton="Cancelar"
         title={title}>
-        <Box marginTop={1} marginBottom={3}>
-          {children ? (
-            children
-          ) : (
-            <Typography>Tem certeza que deseja excluir este {term}?</Typography>
-          )}
-        </Box>
+        {children ? (
+          children
+        ) : (
+          <Typography>Tem certeza que deseja excluir este {term}?</Typography>
+        )}
       </Modal>
     </>
   );

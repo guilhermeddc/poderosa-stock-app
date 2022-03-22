@@ -1,6 +1,6 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth} from 'firebase/auth';
-import {getFirestore} from 'firebase/firestore/lite';
+import {collection, getFirestore} from 'firebase/firestore/lite';
 import {getStorage} from 'firebase/storage';
 
 const app = initializeApp({
@@ -12,9 +12,13 @@ const app = initializeApp({
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 });
 
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
-export {db, auth, storage};
+export const sellerDB = collection(db, 'sellers');
+export const productDB = collection(db, 'products');
+export const providerDB = collection(db, 'providers');
+export const adminDB = collection(db, 'admins');
+
 export default app;

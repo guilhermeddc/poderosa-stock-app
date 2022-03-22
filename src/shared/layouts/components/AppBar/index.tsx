@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {
   MenuOpenRounded,
@@ -67,6 +67,10 @@ export const AppBar: React.FC<IProps> = ({
 
     setButtonActive(!buttonActive);
   }, [buttonActive, handleDrawerOpen, setButtonActive]);
+
+  useEffect(() => {
+    if (!drawerOpen && buttonActive) setButtonActive(false);
+  }, [buttonActive, drawerOpen, setButtonActive]);
 
   return (
     <MuiAppBar position="fixed" open={drawerOpen}>

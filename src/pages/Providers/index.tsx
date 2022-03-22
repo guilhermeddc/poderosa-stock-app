@@ -11,16 +11,16 @@ import {
   Subtitle,
   Title,
 } from 'shared/components';
-import {cpfMask, phoneMask} from 'shared/helpers/masks';
+import {cnpjMask, phoneMask} from 'shared/helpers/masks';
 import {feedback} from 'shared/services/alertService';
-import {ISeller, sellerService} from 'shared/services/api/seller';
+import {IProvider, providerService} from 'shared/services/api/provider';
 
-import {ModalSeller} from './ModalSeller';
+import {ModalProvider} from './ModalProvider';
 
-export const Sellers: React.FC = () => {
-  const [data, setData] = useState<ISeller[]>([]);
+export const Providers: React.FC = () => {
+  const [data, setData] = useState<IProvider[]>([]);
   const [filter, setFilter] = useState('');
-  const [seller, setSeller] = useState<ISeller | undefined>();
+  const [provider, setProvider] = useState<IProvider | undefined>();
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
@@ -32,7 +32,7 @@ export const Sellers: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await sellerService.getSellers();
+      const response = await providerService.getProviders();
 
       setData(response);
     } catch (error) {
@@ -46,20 +46,20 @@ export const Sellers: React.FC = () => {
     getData();
   }, [getData]);
 
-  const handleEditModal = useCallback((row: ISeller) => {
-    setSeller(row);
+  const handleEditModal = useCallback((row: IProvider) => {
+    setProvider(row);
 
     setOpenModal(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
-    setSeller(undefined);
+    setProvider(undefined);
 
     setOpenModal(false);
   }, []);
 
   const handleClickModal = useCallback(() => {
-    setSeller(undefined);
+    setProvider(undefined);
 
     setOpenModal(false);
     getData();
@@ -74,7 +74,7 @@ export const Sellers: React.FC = () => {
   const handleConfirmDeleted = useCallback(async () => {
     try {
       setLoading(true);
-      await sellerService.deleteSeller(idDeleted);
+      await providerService.deleteProvider(idDeleted);
 
       await getData();
 
@@ -92,7 +92,7 @@ export const Sellers: React.FC = () => {
       return data.filter(
         (item) =>
           item.name.toLowerCase().includes(filter.toLowerCase()) ||
-          item.cpf.toLowerCase().includes(filter.toLowerCase()),
+          item.cnpj.toLowerCase().includes(filter.toLowerCase()),
       );
     }
     return [];
@@ -102,7 +102,7 @@ export const Sellers: React.FC = () => {
     <>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
-          <Title title="Gestão de vendedores" />
+          <Title title="Gestão de fornecedores" />
         </Grid>
 
         <Grid item xs={12} sm={6}>
@@ -121,7 +121,7 @@ export const Sellers: React.FC = () => {
         <Grid item xs={12}>
           <FilterData>
             <InputSearch
-              placeholder="Pesquisar por nome ou CPF..."
+              placeholder="Pesquisar por nome ou CNPJ..."
               value={filter}
               onChange={({target}) => setFilter(target.value)}
             />
@@ -129,7 +129,7 @@ export const Sellers: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Subtitle subtitle="Vendedores" />
+          <Subtitle subtitle="Fornecedores" />
         </Grid>
 
         <Grid item xs={12}>
@@ -168,10 +168,10 @@ export const Sellers: React.FC = () => {
                 minWidth: 200,
               },
               {
-                field: 'cpf',
-                headerName: 'CPF',
+                field: 'cnpj',
+                headerName: 'CNPJ',
                 minWidth: 200,
-                renderCell: (params) => cpfMask(params.row.cpf),
+                renderCell: (params) => cnpjMask(params.row.cnpj),
               },
               {
                 field: 'phone',
@@ -185,11 +185,11 @@ export const Sellers: React.FC = () => {
         </Grid>
       </Grid>
 
-      <ModalSeller
+      <ModalProvider
         openModal={openModal}
         onClick={handleClickModal}
         onClose={handleCloseModal}
-        initialData={seller}
+        initialData={provider}
       />
 
       <ModalConfirm
@@ -204,4 +204,4 @@ export const Sellers: React.FC = () => {
   );
 };
 
-export default Sellers;
+export default Providers;

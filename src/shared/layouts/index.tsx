@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from 'react';
 
-import {Box, Container, useTheme} from '@mui/material';
+import {Box, Container, Toolbar} from '@mui/material';
 import {useDrawer} from 'shared/hooks';
 
 import {AppBar, Drawer, AlertComponent} from './components';
@@ -9,7 +9,6 @@ export const BaseLayout: React.FC = ({children}) => {
   const [buttonActive, setButtonActive] = useState(false);
 
   const {drawerOpen, setDrawerOpen, menuOptions} = useDrawer();
-  const theme = useTheme();
 
   const handleDrawerOpen = useCallback(() => {
     setDrawerOpen(!drawerOpen);
@@ -32,9 +31,13 @@ export const BaseLayout: React.FC = ({children}) => {
         buttonActive={buttonActive}
       />
 
-      <main style={{flexGrow: 1, margin: theme.spacing(12, 0)}}>
+      <Box
+        component="main"
+        sx={{flexGrow: 2, minHeight: '100vh', py: 3}}
+        onClick={() => setDrawerOpen(false)}>
+        <Toolbar />
         <Container maxWidth="lg">{children}</Container>
-      </main>
+      </Box>
 
       <AlertComponent />
     </Box>

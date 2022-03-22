@@ -7,12 +7,9 @@ import {PrivateRoutes} from './private.routes';
 import {PublicRoutes} from './public.routes';
 
 export const Routes: React.FC = () => {
-  const {authenticated} = useAuth();
+  const {authenticated, isAdmin} = useAuth();
 
-  // eslint-disable-next-line
-  console.log('*** authenticated', authenticated);
-
-  const Routes = authenticated ? PrivateRoutes : PublicRoutes;
+  const Routes = authenticated && isAdmin ? PrivateRoutes : PublicRoutes;
 
   return (
     <BrowserRouter>

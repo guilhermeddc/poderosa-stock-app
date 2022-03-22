@@ -1,7 +1,13 @@
-import {collection, getDoc, getDocs} from '@firebase/firestore/lite';
-import {addDoc, deleteDoc, doc, updateDoc} from 'firebase/firestore/lite';
+import {
+  addDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from 'firebase/firestore/lite';
 import {IRequestResult} from 'shared/interfaces';
-import {db} from 'shared/services/firebase';
+import {providerDB} from 'shared/services/firebase';
 
 export interface IProvider {
   id: string;
@@ -10,8 +16,6 @@ export interface IProvider {
   phone: string;
   cnpj: string;
 }
-
-const providerDB = collection(db, 'providers');
 
 const getProviders = async (): Promise<IProvider[]> => {
   try {

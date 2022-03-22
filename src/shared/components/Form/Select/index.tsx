@@ -66,7 +66,7 @@ export const Select: React.FC<TVSelectProps> = ({
         ref={inputRef}
         label={label}
         error={!!error}
-        value={value}
+        value={value || ''}
         onChange={handleChange}
         defaultValue={defaultValue || ''}>
         {children}

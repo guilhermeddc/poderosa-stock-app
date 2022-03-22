@@ -40,7 +40,7 @@ export const Modal: React.FC<IProps> = ({
   return (
     <Dialog open={opened} onClose={onClose} maxWidth={maxWidth} fullWidth>
       {title && (
-        <Box p={3}>
+        <Box pt={3} px={3}>
           <Typography variant="h6" fontWeight={500} color="primary">
             {title}
           </Typography>
@@ -50,7 +50,8 @@ export const Modal: React.FC<IProps> = ({
       {(labelSaveButton || labelCloseButton) && (
         <DialogActions
           sx={{
-            p: 3,
+            pb: 3,
+            px: 3,
           }}>
           {labelCloseButton && (
             <Button

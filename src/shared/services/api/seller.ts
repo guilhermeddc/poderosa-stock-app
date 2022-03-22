@@ -1,6 +1,5 @@
 import {
   addDoc,
-  collection,
   deleteDoc,
   doc,
   getDoc,
@@ -8,7 +7,7 @@ import {
   updateDoc,
 } from '@firebase/firestore/lite';
 import {IRequestResult} from 'shared/interfaces';
-import {db} from 'shared/services/firebase';
+import {sellerDB} from 'shared/services/firebase';
 
 export interface ISeller {
   id: string;
@@ -17,8 +16,6 @@ export interface ISeller {
   phone: string;
   cpf: string;
 }
-
-const sellerDB = collection(db, 'sellers');
 
 const getSellers = async (): Promise<ISeller[]> => {
   try {

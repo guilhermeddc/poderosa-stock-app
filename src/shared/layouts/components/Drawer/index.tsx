@@ -91,10 +91,6 @@ export const Drawer: React.FC<IProps> = ({
             [theme.breakpoints.up('sm')]: {
               width: drawerOpen ? drawerWidth : theme.spacing(9),
             },
-            [theme.breakpoints.down('sm')]: {
-              width: '0',
-              padding: '0',
-            },
           }}
           width={360}>
           <Toolbar />
@@ -214,12 +210,10 @@ export const Drawer: React.FC<IProps> = ({
                     duration: theme.transitions.duration.leavingScreen,
                   }),
               overflowX: 'hidden',
-              [theme.breakpoints.up('sm')]: {
-                width: drawerOpen ? drawerWidth : theme.spacing(9),
-              },
-              [theme.breakpoints.down('sm')]: {
-                width: '0',
-                padding: '0',
+              [theme.breakpoints.only('xs')]: {
+                width: drawerOpen ? drawerWidth : 0,
+                p: !drawerOpen ? 0 : 1,
+                maxWidth: drawerOpen ? drawerWidth : 0,
               },
             }}>
             <ListItemIcon>

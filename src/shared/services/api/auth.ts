@@ -1,4 +1,4 @@
-import {collection, getDocs} from '@firebase/firestore/lite';
+import {getDocs} from '@firebase/firestore/lite';
 import {
   GoogleAuthProvider,
   inMemoryPersistence,
@@ -8,7 +8,7 @@ import {
   signOut as FSignOut,
   User,
 } from 'firebase/auth';
-import {auth, db} from 'shared/services/firebase';
+import {adminDB, auth} from 'shared/services/firebase';
 
 export interface IUser {
   user: User;
@@ -19,9 +19,7 @@ const provider = new GoogleAuthProvider();
 
 const isAdmin = async (uid: string): Promise<boolean> => {
   try {
-    const adminStorage = collection(db, 'admins');
-
-    const adminSnapshot = await getDocs(adminStorage);
+    const adminSnapshot = await getDocs(adminDB);
     const adminList = adminSnapshot.docs.map((doc) => doc.data());
 
     return adminList.filter((item) => item.id === uid).length > 0;
@@ -39,9 +37,6 @@ const signIn = async (): Promise<IUser> => {
     const user = resUser.user;
 
     const admin = await isAdmin(resUser.user.uid);
-
-    // eslint-disable-next-line
-    console.log('*** {user, admin}', {user, admin});
 
     return {user, admin};
   } catch (error: any) {
