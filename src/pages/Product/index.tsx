@@ -5,10 +5,12 @@ import {
   Grid,
   MenuItem,
   Stack,
-  TextField,
   useMediaQuery,
   Tooltip,
   IconButton,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   Button,
@@ -175,39 +177,44 @@ export const Product: React.FC = () => {
               </Grid>
 
               <Grid item xs={12} sm={3}>
-                <TextField
-                  label="Vendedor(a)s"
-                  select
-                  fullWidth
-                  value={seller}
-                  onChange={({target}) => setSeller(target.value)}>
-                  {sellers &&
-                    sellers.length > 0 &&
-                    sellers.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.name}
-                      </MenuItem>
-                    ))}
-                </TextField>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel id="seller">Vendedor(a)s</InputLabel>
+                  <Select
+                    label="Vendedor(a)s"
+                    id="seller"
+                    labelId="seller"
+                    value={seller || ''}
+                    onChange={({target}) => setSeller(target.value)}>
+                    {sellers &&
+                      sellers.length > 0 &&
+                      sellers.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>
+                          {item.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
               </Grid>
 
               <Grid item xs={12} sm={3}>
-                <TextField
-                  label="Fábricas"
-                  select
-                  fullWidth
-                  value={provider}
-                  onChange={({target}) => setProvider(target.value)}>
-                  {providers &&
-                    providers.length > 0 &&
-                    providers.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.name}
-                      </MenuItem>
-                    ))}
-                </TextField>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel id="provider">Fábricas</InputLabel>
+                  <Select
+                    label="Fábricas"
+                    id="provider"
+                    labelId="provider"
+                    value={provider || ''}
+                    onChange={({target}) => setProvider(target.value)}>
+                    {providers &&
+                      providers.length > 0 &&
+                      providers.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>
+                          {item.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
               </Grid>
-              <Grid item xs={12}></Grid>
             </Grid>
           </FilterData>
         </Grid>

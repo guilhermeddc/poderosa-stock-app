@@ -46,16 +46,16 @@ export const ModalProduct: React.FC<IProps> = ({
           abortEarly: false,
         });
 
+        const ajusteData = {
+          ...data,
+          profitValue: Number((data.saleValue - data.purchaseValue).toFixed(2)),
+          saleValue: Number(data.saleValue).toFixed(2),
+          purchaseValue: Number(data.purchaseValue).toFixed(2),
+        };
+
         initialData
-          ? null
-          : await productService.createProduct({
-              ...data,
-              profitValue: Number(
-                (data.saleValue - data.purchaseValue).toFixed(2),
-              ),
-              saleValue: Number(data.saleValue).toFixed(2),
-              purchaseValue: Number(data.purchaseValue).toFixed(2),
-            });
+          ? await productService.updateProduct(initialData.id, ajusteData)
+          : await productService.createProduct(ajusteData);
 
         onClick();
       } catch (err) {

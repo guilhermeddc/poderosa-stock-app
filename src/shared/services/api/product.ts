@@ -113,7 +113,12 @@ const updateProduct = async (
   payload: Omit<IProduct, 'id'>,
 ): Promise<IRequestResult> => {
   try {
-    await updateDoc(doc(productDB, id), payload);
+    await updateDoc(doc(productDB, id), {
+      ...payload,
+      sold: false,
+      purchaseValue: Number(payload.purchaseValue),
+      saleValue: Number(payload.saleValue),
+    });
 
     return {success: true};
   } catch (error: any) {
