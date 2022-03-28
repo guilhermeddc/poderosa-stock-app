@@ -5,7 +5,7 @@ import {
   getDoc,
   getDocs,
   updateDoc,
-} from 'firebase/firestore/lite';
+} from 'firebase/firestore';
 import {IRequestResult} from 'shared/interfaces';
 import {providerDB} from 'shared/services/firebase';
 

@@ -7,9 +7,10 @@ import {
   query,
   updateDoc,
   where,
-} from '@firebase/firestore/lite';
+} from 'firebase/firestore';
+import {httpsCallable} from 'firebase/functions';
 import {IRequestResult} from 'shared/interfaces';
-import {productDB} from 'shared/services/firebase';
+import {productDB, functions} from 'shared/services/firebase';
 
 import {IProvider, providerService} from './provider';
 import {ISeller, sellerService} from './seller';
@@ -18,29 +19,40 @@ export interface IProduct {
   id: string;
   code: string;
   description: string;
+  quantity: number;
   purchaseValue: number;
   saleValue: number;
   profitValue: number;
   size: string;
-  seller: ISeller;
+  seller?: ISeller | null;
   provider: IProvider;
   sold: boolean;
-  travel: string;
+  travel?: string;
 }
 
 export interface ICreateProduct {
   code: string;
   description: string;
+  quantity: number;
   purchaseValue: number;
   saleValue: number;
   profitValue: number;
   size: string;
-  seller: string;
+  seller?: string;
   provider: string;
   sold: boolean;
+  travel?: string;
 }
 
-const getProducts = async (): Promise<IProduct[]> => {
+interface IListProduct {
+  productList: IProduct[];
+  totalSaleValue: number;
+  totalProfitValue: number;
+  totalQuantity: number;
+  totalPurchaseValue: number;
+}
+
+const getProducts = async (): Promise<IListProduct> => {
   try {
     const productSnapshot = await getDocs(productDB);
     const productList = await Promise.all(
@@ -52,8 +64,11 @@ const getProducts = async (): Promise<IProduct[]> => {
           purchaseValue: data.data().purchaseValue,
           saleValue: data.data().saleValue,
           profitValue: data.data().profitValue,
+          quantity: data.data().quantity,
           size: data.data().size,
-          seller: await sellerService.getSeller(data.data().seller),
+          seller: data.data().seller
+            ? await sellerService.getSeller(data.data().seller)
+            : null,
           provider: await providerService.getProvider(data.data().provider),
           sold: data.data().sold,
           travel: data.data().travel,
@@ -61,7 +76,25 @@ const getProducts = async (): Promise<IProduct[]> => {
       }),
     );
 
-    return productList;
+    let totalSaleValue = 0;
+    let totalProfitValue = 0;
+    let totalQuantity = 0;
+    let totalPurchaseValue = 0;
+
+    productList.forEach((product) => {
+      totalSaleValue += product.saleValue;
+      totalProfitValue += product.profitValue;
+      totalQuantity += Number(product.quantity);
+      totalPurchaseValue += product.purchaseValue;
+    });
+
+    return {
+      productList,
+      totalSaleValue,
+      totalProfitValue,
+      totalQuantity,
+      totalPurchaseValue,
+    };
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
@@ -81,6 +114,26 @@ const getProduct = async (id: string): Promise<IProduct> => {
   }
 };
 
+const createProductForCloudFunctions = async (payload: ICreateProduct) => {
+  try {
+    const createProduct = httpsCallable(functions, 'createProduct');
+
+    const result = await createProduct({
+      ...payload,
+      sold: false,
+      quantity: 2,
+      purchaseValue: Number(payload.purchaseValue),
+      saleValue: Number(payload.saleValue),
+    });
+
+    return result;
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
 const createProduct = async (
   payload: ICreateProduct,
 ): Promise<IRequestResult> => {
@@ -93,9 +146,39 @@ const createProduct = async (
       throw new Error('Código já utilizado');
     }
 
+    if (payload.seller) {
+      const seller = await sellerService.getSeller(payload.seller);
+
+      if (!seller) {
+        throw new Error('Vendedor não encontrado');
+      }
+    }
+
+    if (payload.provider) {
+      const provider = await providerService.getProvider(payload.provider);
+
+      if (!provider) {
+        throw new Error('Fornecedor não encontrado');
+      }
+    }
+
+    if (payload.quantity > 1) {
+      for (let i = 0; i < payload.quantity; i++) {
+        await addDoc(productDB, {
+          ...payload,
+          sold: false,
+          quantity: 1,
+          purchaseValue: Number(payload.purchaseValue),
+          saleValue: Number(payload.saleValue),
+        });
+      }
+      return {success: true};
+    }
+
     await addDoc(productDB, {
       ...payload,
       sold: false,
+      quantity: 1,
       purchaseValue: Number(payload.purchaseValue),
       saleValue: Number(payload.saleValue),
     });
@@ -146,4 +229,5 @@ export const productService = {
   createProduct,
   deleteProduct,
   updateProduct,
+  createProductForCloudFunctions,
 };

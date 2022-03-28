@@ -7,6 +7,7 @@ import {BaseLayout} from 'shared/layouts';
 const Home = lazy(() => import('pages/Home'));
 const Product = lazy(() => import('pages/Product'));
 const Sellers = lazy(() => import('pages/Sellers'));
+const SellerDetail = lazy(() => import('pages/Sellers/Detail'));
 const Providers = lazy(() => import('pages/Providers'));
 
 export const PrivateRoutes: React.FC = () => {
@@ -17,6 +18,7 @@ export const PrivateRoutes: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="produtos" element={<Product />} />
           <Route path="vendedores" element={<Sellers />} />
+          <Route path="vendedores/:id" element={<SellerDetail />} />
           <Route path="fornecedores" element={<Providers />} />
 
           <Route path="*" element={() => <Navigate to="/" replace />} />

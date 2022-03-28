@@ -1,6 +1,12 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
-import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
+import {
+  AddRounded,
+  DeleteRounded,
+  EditRounded,
+  VisibilityRounded,
+} from '@mui/icons-material';
 import {Grid, IconButton, Stack, Tooltip, useMediaQuery} from '@mui/material';
 import {
   Button,
@@ -27,6 +33,7 @@ export const Sellers: React.FC = () => {
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
   const matches = useMediaQuery('(min-width:600px)');
+  const navigate = useNavigate();
 
   const getData = useCallback(async () => {
     try {
@@ -152,6 +159,15 @@ export const Sellers: React.FC = () => {
                     <Tooltip title="Deletar">
                       <IconButton onClick={() => handleDelete(params.row.id)}>
                         <DeleteRounded color="primary" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Detalhes">
+                      <IconButton
+                        onClick={() =>
+                          navigate(`/vendedores/${params.row.id}`)
+                        }>
+                        <VisibilityRounded color="primary" />
                       </IconButton>
                     </Tooltip>
                   </>

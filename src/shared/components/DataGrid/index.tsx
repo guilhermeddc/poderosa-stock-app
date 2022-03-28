@@ -49,7 +49,7 @@ const localizedTextsMap: Partial<GridLocaleText> | undefined = {
 export const DataGrid: React.FC<IProps> = ({
   rows,
   columns,
-  pageSize = 5,
+  pageSize = 10,
   checkboxSelection = false,
   ...rest
 }) => {

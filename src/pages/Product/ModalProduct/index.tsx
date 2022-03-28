@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 
 import {Divider, Grid, MenuItem, Typography} from '@mui/material';
 import {FormHandles} from '@unform/core';
@@ -26,16 +26,20 @@ export const ModalProduct: React.FC<IProps> = ({
   providers,
   sellers,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   const formRef = useRef<FormHandles>(null);
 
   const handleOnSubmit = useCallback(
     async (data) => {
+      setLoading(true);
       try {
         formRef.current?.setErrors({});
 
         const schema = Yup.object().shape({
           code: Yup.string().required(),
           description: Yup.string().required(),
+          quantity: Yup.number().required().min(1),
           size: Yup.string().required(),
           purchaseValue: Yup.number().required(),
           saleValue: Yup.number().required(),
@@ -63,6 +67,8 @@ export const ModalProduct: React.FC<IProps> = ({
           const errors = getValidationErrors(err as Yup.ValidationError);
           formRef.current?.setErrors(errors);
         }
+      } finally {
+        setLoading(false);
       }
     },
     [initialData, onClick],
@@ -78,6 +84,7 @@ export const ModalProduct: React.FC<IProps> = ({
       onClick={handleClick}
       onClose={onClose}
       title="Adicionar novo Produto"
+      loading={loading}
       labelCloseButton="Fechar"
       labelSaveButton="Adicionar">
       <Form
@@ -85,12 +92,16 @@ export const ModalProduct: React.FC<IProps> = ({
         onSubmit={handleOnSubmit}
         initialData={{
           ...initialData,
-          seller: initialData?.seller.id,
+          seller: initialData?.seller?.id || '',
           provider: initialData?.provider.id,
         }}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid item xs={9}>
             <TextField name="description" label="Descrição" />
+          </Grid>
+
+          <Grid item xs={3}>
+            <TextField name="quantity" label="Quantidade" type="number" />
           </Grid>
 
           <Grid item xs={12} sm={6}>

@@ -30,8 +30,16 @@ import {ISeller, sellerService} from 'shared/services/api/seller';
 
 import {ModalProduct} from './ModalProduct';
 
+interface ITotalValues {
+  totalSaleValue: number;
+  totalProfitValue: number;
+  totalQuantity: number;
+  totalPurchaseValue: number;
+}
+
 export const Product: React.FC = () => {
   const [data, setData] = useState<IProduct[]>([]);
+  const [totalValues, setTotalValues] = useState<ITotalValues | undefined>();
   const [product, setProduct] = useState<IProduct | undefined>();
   const [sellers, setSellers] = useState<ISeller[]>([]);
   const [seller, setSeller] = useState('');
@@ -55,7 +63,14 @@ export const Product: React.FC = () => {
 
       setProviders(resProvider);
       setSellers(resSeller);
-      setData(resData);
+      setData(resData.productList);
+
+      setTotalValues({
+        totalSaleValue: resData.totalSaleValue,
+        totalProfitValue: resData.totalProfitValue,
+        totalQuantity: resData.totalQuantity,
+        totalPurchaseValue: resData.totalPurchaseValue,
+      });
     } catch (error) {
       feedback('Erro ao carregar os dados', 'error');
     } finally {
@@ -78,14 +93,14 @@ export const Product: React.FC = () => {
         return data.filter(
           (item) =>
             itemFiltered(item) &&
-            item.seller.id === seller &&
+            item.seller?.id === seller &&
             item.provider.id === provider,
         );
       }
 
       if (seller) {
         return data.filter(
-          (item) => itemFiltered(item) && item.seller.id === seller,
+          (item) => itemFiltered(item) && item.seller?.id === seller,
         );
       }
 
@@ -99,6 +114,12 @@ export const Product: React.FC = () => {
     }
     return [];
   }, [data, filter, provider, seller]);
+
+  const handleResetFilter = useCallback(() => {
+    setFilter('');
+    setSeller('');
+    setProvider('');
+  }, []);
 
   const handleEditModal = useCallback((row: IProduct) => {
     setProduct(row);
@@ -144,6 +165,9 @@ export const Product: React.FC = () => {
   if (loading) {
     <LinearDeterminate />;
   }
+
+  // eslint-disable-next-line
+  console.log('*** totalValues', totalValues);
 
   return (
     <>
@@ -214,6 +238,16 @@ export const Product: React.FC = () => {
                       ))}
                   </Select>
                 </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button
+                    label="Limpar filtros"
+                    minWidth={180}
+                    onClick={handleResetFilter}
+                  />
+                </Stack>
               </Grid>
             </Grid>
           </FilterData>
@@ -287,7 +321,7 @@ export const Product: React.FC = () => {
               {
                 field: 'seller',
                 headerName: 'Vendedor',
-                renderCell: (params) => params.row.seller.name,
+                renderCell: (params) => params.row.seller?.name,
                 minWidth: 180,
               },
               {

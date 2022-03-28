@@ -1,4 +1,3 @@
-import {getDocs} from '@firebase/firestore/lite';
 import {
   GoogleAuthProvider,
   inMemoryPersistence,
@@ -8,6 +7,7 @@ import {
   signOut as FSignOut,
   User,
 } from 'firebase/auth';
+import {getDocs} from 'firebase/firestore';
 import {adminDB, auth} from 'shared/services/firebase';
 
 export interface IUser {

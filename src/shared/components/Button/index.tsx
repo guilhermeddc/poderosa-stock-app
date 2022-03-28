@@ -47,9 +47,7 @@ export const Button: React.FC<IProps> = ({
         borderColor: error ? '#F50000' : undefined,
         minWidth: minWidth,
       }}>
-      {label}
-      {loading && <CircularProgress size={24} />}
-      {children}
+      {loading ? <CircularProgress size={24} /> : children ?? label}
     </MuiButton>
   );
 };
