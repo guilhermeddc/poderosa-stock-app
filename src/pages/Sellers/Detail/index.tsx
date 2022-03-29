@@ -153,7 +153,7 @@ export const Detail: React.FC = () => {
               minWidth: 180,
             },
           ]}
-          rows={productsData?.productList || []}
+          rows={productsData?.products || []}
         />
       </Grid>
     </Grid>

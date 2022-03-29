@@ -8,11 +8,11 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
+import {httpsCallable} from 'firebase/functions';
 import {IRequestResult} from 'shared/interfaces';
-import {productDB, sellerDB, userDB} from 'shared/services/firebase';
+import {functions, sellerDB, userDB} from 'shared/services/firebase';
 
 import {IProduct} from './product';
-import {providerService} from './provider';
 import {IUser} from './user';
 
 export interface ISeller {
@@ -26,7 +26,9 @@ export interface ISeller {
 
 const getSellers = async (): Promise<IUser[]> => {
   try {
-    const seller = await getDocs(query(userDB, where('type', '==', 'seller')));
+    const seller = await getDocs(
+      query(userDB, where('type', 'array-contains', 'seller')),
+    );
 
     return seller.docs.map((data) => {
       return {
@@ -109,7 +111,7 @@ const deleteSeller = async (id: string): Promise<IRequestResult> => {
 };
 
 export interface IListProduct {
-  productList: IProduct[];
+  products: IProduct[];
   totalSaleValue: number;
   totalProfitValue: number;
   totalQuantity: number;
@@ -118,41 +120,13 @@ export interface IListProduct {
 
 const getSellerProducts = async (seller: string): Promise<IListProduct> => {
   try {
-    const productSnapshot = await getDocs(
-      query(productDB, where('seller', '==', seller)),
-    );
-    const productList = await Promise.all(
-      productSnapshot.docs.map(async (data) => {
-        return {
-          id: data.id,
-          seller: data.data().seller
-            ? await sellerService.getSeller(data.data().seller)
-            : null,
-          provider: await providerService.getProvider(data.data().provider),
-          ...data.data(),
-        } as IProduct;
-      }),
-    );
+    const getProducts = httpsCallable(functions, 'getProducts');
+    const result = await getProducts({seller});
 
-    let totalSaleValue = 0;
-    let totalProfitValue = 0;
-    let totalQuantity = 0;
-    let totalPurchaseValue = 0;
+    // eslint-disable-next-line
+    console.log('*** result', result);
 
-    productList.forEach((product) => {
-      totalSaleValue += product.saleValue;
-      totalProfitValue += product.profitValue;
-      totalQuantity += Number(product.quantity);
-      totalPurchaseValue += product.purchaseValue;
-    });
-
-    return {
-      productList,
-      totalSaleValue,
-      totalProfitValue,
-      totalQuantity,
-      totalPurchaseValue,
-    };
+    return result.data as IListProduct;
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;

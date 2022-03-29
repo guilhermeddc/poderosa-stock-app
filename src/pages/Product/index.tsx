@@ -66,7 +66,7 @@ export const Product: React.FC = () => {
 
       setProviders(resProvider);
       setSellers(resSeller);
-      setData(resData.productList);
+      setData(resData.products);
 
       setTotalValues({
         totalSaleValue: resData.totalSaleValue,
@@ -165,7 +165,10 @@ export const Product: React.FC = () => {
     setOpenModalConfirmExclude(false);
   }, [getData, idDeleted]);
 
-  if (loading) {
+  // eslint-disable-next-line
+  console.log('*** data', data);
+
+  if (loading || data.length === 0) {
     <LinearDeterminate />;
   }
 
