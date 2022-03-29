@@ -8,11 +8,11 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
-import {httpsCallable} from 'firebase/functions';
 import {IRequestResult} from 'shared/interfaces';
-import {functions, sellerDB, userDB} from 'shared/services/firebase';
+import {productDB, sellerDB, userDB} from 'shared/services/firebase';
 
 import {IProduct} from './product';
+import {providerService} from './provider';
 import {IUser} from './user';
 
 export interface ISeller {
@@ -120,13 +120,41 @@ export interface IListProduct {
 
 const getSellerProducts = async (seller: string): Promise<IListProduct> => {
   try {
-    const getProducts = httpsCallable(functions, 'getProducts');
-    const result = await getProducts({seller});
+    const productSnapshot = await getDocs(
+      query(productDB, where('seller', '==', seller)),
+    );
+    const products = await Promise.all(
+      productSnapshot.docs.map(async (data) => {
+        return {
+          ...data.data(),
+          id: data.id,
+          seller: data.data().seller
+            ? await sellerService.getSeller(data.data().seller)
+            : null,
+          provider: await providerService.getProvider(data.data().provider),
+        } as IProduct;
+      }),
+    );
 
-    // eslint-disable-next-line
-    console.log('*** result', result);
+    let totalSaleValue = 0;
+    let totalProfitValue = 0;
+    let totalQuantity = 0;
+    let totalPurchaseValue = 0;
 
-    return result.data as IListProduct;
+    products.forEach((product) => {
+      totalSaleValue += product.saleValue;
+      totalProfitValue += product.profitValue;
+      totalQuantity += Number(product.quantity);
+      totalPurchaseValue += product.purchaseValue;
+    });
+
+    return {
+      products,
+      totalSaleValue,
+      totalProfitValue,
+      totalQuantity,
+      totalPurchaseValue,
+    };
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;

@@ -165,9 +165,6 @@ export const Product: React.FC = () => {
     setOpenModalConfirmExclude(false);
   }, [getData, idDeleted]);
 
-  // eslint-disable-next-line
-  console.log('*** data', data);
-
   if (loading || data.length === 0) {
     <LinearDeterminate />;
   }

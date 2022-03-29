@@ -22,9 +22,6 @@ export const AuthProvider: React.FC = ({children}) => {
     try {
       const response = await authService.signIn();
 
-      // eslint-disable-next-line
-      console.log('*** response', response);
-
       localStorage.setItem('@user', JSON.stringify(response));
 
       setUser(response);

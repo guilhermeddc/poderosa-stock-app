@@ -54,10 +54,39 @@ interface IListProduct {
 
 const getProducts = async (): Promise<IListProduct> => {
   try {
-    const getProductData = httpsCallable(functions, 'getProducts');
-    const result = await getProductData({seller: null});
+    const productSnapshot = await getDocs(productDB);
+    const products = await Promise.all(
+      productSnapshot.docs.map(async (data) => {
+        return {
+          ...data.data(),
+          id: data.id,
+          seller: data.data().seller
+            ? await sellerService.getSeller(data.data().seller)
+            : null,
+          provider: await providerService.getProvider(data.data().provider),
+        };
+      }) as Promise<IProduct>[],
+    );
 
-    return result.data as IListProduct;
+    let totalSaleValue = 0;
+    let totalProfitValue = 0;
+    let totalQuantity = 0;
+    let totalPurchaseValue = 0;
+
+    products.forEach((product) => {
+      totalSaleValue += product.saleValue;
+      totalProfitValue += product.profitValue;
+      totalQuantity += Number(product.quantity);
+      totalPurchaseValue += product.purchaseValue;
+    });
+
+    return {
+      products,
+      totalSaleValue,
+      totalProfitValue,
+      totalQuantity,
+      totalPurchaseValue,
+    };
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
