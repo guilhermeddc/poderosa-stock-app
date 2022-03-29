@@ -16,7 +16,7 @@ export interface ICreateProduct {
   sold: boolean;
 }
 
-export const createProduct = https.onCall((data: ICreateProduct, context) => {
+export const getSellerProductData = https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new https.HttpsError(
       'failed-precondition',
@@ -24,27 +24,31 @@ export const createProduct = https.onCall((data: ICreateProduct, context) => {
     );
   }
 
-  const product = {
-    code: data.code,
-    description: data.description,
-    quantity: 1,
-    purchaseValue: data.purchaseValue,
-    saleValue: data.saleValue,
-    profitValue: data.profitValue,
-    size: data.size,
-    seller: data.seller,
-    provider: data.provider,
-    sold: false,
-    createdAt: firestore.FieldValue.serverTimestamp(),
+  const seller = data.seller;
+  const products = await firestore()
+    .collection('products')
+    .where('seller', '==', seller)
+    .get();
+
+  const productsData = products.docs.map((doc) => doc.data());
+
+  let totalSaleValue = 0;
+  let totalProfitValue = 0;
+  let totalQuantity = 0;
+  let totalPurchaseValue = 0;
+
+  productsData.forEach((product) => {
+    totalSaleValue += product.saleValue;
+    totalProfitValue += product.profitValue;
+    totalQuantity += Number(product.quantity);
+    totalPurchaseValue += product.purchaseValue;
+  });
+
+  return {
+    products: productsData,
+    totalSaleValue,
+    totalProfitValue,
+    totalQuantity,
+    totalPurchaseValue,
   };
-
-  if (data.quantity === 1) {
-    firestore().collection('products').add(product);
-  } else {
-    for (let index = 0; index < data.quantity; index++) {
-      firestore().collection('products').add(product);
-    }
-  }
-
-  return {success: true};
 });

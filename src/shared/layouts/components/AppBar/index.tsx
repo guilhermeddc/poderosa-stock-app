@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {
   MenuOpenRounded,
@@ -14,9 +15,7 @@ import {
   IconButton,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemIcon,
-  ListItemText,
   Menu,
   MenuItem,
   Typography,
@@ -24,7 +23,13 @@ import {
   useTheme,
 } from '@mui/material';
 import {logoRet} from 'shared/assets';
+import {Notification} from 'shared/components';
 import {useAuth, useTitle} from 'shared/hooks';
+import {feedback} from 'shared/services/alertService';
+import {
+  INotification,
+  notificationService,
+} from 'shared/services/api/notifications';
 
 import {MuiAppBar} from '../styles';
 
@@ -41,6 +46,7 @@ export const AppBar: React.FC<IProps> = ({
   setButtonActive,
   handleDrawerOpen,
 }) => {
+  const [notifications, setNotifications] = useState<INotification[]>([]);
   const [anchorElNotify, setAnchorElNotify] = useState<null | HTMLElement>(
     null,
   );
@@ -50,6 +56,21 @@ export const AppBar: React.FC<IProps> = ({
   const {user} = useAuth();
   const theme = useTheme();
   const matches = useMediaQuery('(min-width:600px)');
+  const navigate = useNavigate();
+
+  const handleGetNotifications = useCallback(async () => {
+    try {
+      const response = await notificationService.getNotifications(user.id);
+
+      setNotifications(response);
+    } catch (error) {
+      feedback('Erro ao carregar os dados', 'error');
+    }
+  }, [user.id]);
+
+  useEffect(() => {
+    handleGetNotifications();
+  }, [handleGetNotifications]);
 
   const handleClickNotifyMenu = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -58,9 +79,17 @@ export const AppBar: React.FC<IProps> = ({
     [],
   );
 
-  const handleCloseNotifyMenu = useCallback(() => {
-    setAnchorElNotify(null);
-  }, []);
+  const handleCloseNotifyMenu = useCallback(
+    async (id?: string, link?: string) => {
+      id && (await notificationService.markAsRead(id));
+
+      handleGetNotifications();
+
+      link && navigate(link);
+      setAnchorElNotify(null);
+    },
+    [handleGetNotifications, navigate],
+  );
 
   const handleOpenMenu = useCallback(() => {
     handleDrawerOpen();
@@ -126,8 +155,9 @@ export const AppBar: React.FC<IProps> = ({
           <IconButton
             color="inherit"
             id="notify-button"
+            disabled={notifications.length === 0}
             onClick={handleClickNotifyMenu}>
-            <Badge badgeContent={3} color="error">
+            <Badge badgeContent={notifications.length} color="error">
               <NotificationsOutlined />
             </Badge>
           </IconButton>
@@ -140,57 +170,28 @@ export const AppBar: React.FC<IProps> = ({
             }}
             anchorEl={anchorElNotify}
             open={openNotifyMenu}
-            onClose={handleCloseNotifyMenu}>
+            onClose={() => handleCloseNotifyMenu()}>
             <MenuItem disabled>
               <Box width={300}>
-                <Typography align="center">3 novas notificações</Typography>
+                <Typography align="center">
+                  {notifications.length} novas notificações
+                </Typography>
               </Box>
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleCloseNotifyMenu} disableRipple>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>GV</Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary="GVdasa"
-                  secondary={
-                    'Mensagem exemplo para ver como fica'.slice(0, 25) + '...'
-                  }
-                  sx={{maxWidth: 200}}
-                />
-              </ListItem>
-            </MenuItem>
-            <MenuItem onClick={handleCloseNotifyMenu} disableRipple>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>GV</Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary="GVdasa"
-                  secondary={
-                    'Mensagem exemplo para ver como fica'.slice(0, 25) + '...'
-                  }
-                />
-              </ListItem>
-            </MenuItem>
-            <MenuItem onClick={handleCloseNotifyMenu} disableRipple>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>GV</Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary="GVdasa"
-                  secondary={
-                    'Mensagem exemplo para ver como fica'.slice(0, 25) + '...'
-                  }
-                />
-              </ListItem>
-            </MenuItem>
 
             <Divider />
 
-            <MenuItem onClick={handleCloseNotifyMenu}>
+            {notifications.map((item) => (
+              <Notification
+                key={item.id}
+                data={item}
+                onClick={() => handleCloseNotifyMenu(item.id, item.link)}
+              />
+            ))}
+
+            <Divider />
+
+            <MenuItem onClick={() => handleCloseNotifyMenu()}>
               <Box width={300}>
                 <Typography align="center">Ver todas notificações</Typography>
               </Box>
@@ -200,17 +201,17 @@ export const AppBar: React.FC<IProps> = ({
           <Box ml={1} height={16} width="1px" bgcolor="#B3DBD9" />
 
           <Box gap={2} display="flex" alignItems="center">
-            {user.photoURL && user.displayName ? (
-              <Avatar alt={user.displayName} src={user.photoURL} />
+            {user?.imageUrl && user.name ? (
+              <Avatar alt={user.name} src={user?.imageUrl} />
             ) : (
               <Avatar>
-                {`${user.displayName?.split(' ')[0][0]}
-              ${user.displayName?.split(' ')[1][0]}`}
+                {`${user.name?.split(' ')[0][0]}
+              ${user.name?.split(' ')[1][0]}`}
               </Avatar>
             )}
             {matches && (
               <Typography>
-                Olá, <strong>{user.displayName}</strong>
+                Olá, <strong>{user.name}</strong>
               </Typography>
             )}
           </Box>

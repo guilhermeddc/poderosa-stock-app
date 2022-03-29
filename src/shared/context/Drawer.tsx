@@ -72,6 +72,12 @@ export const DrawerProvider: React.FC = ({children}) => {
         icon: 'assignment_turned_in',
         path: '/vendedores',
       },
+      {
+        id: 'users',
+        label: 'Usuários',
+        icon: 'people',
+        path: '/usuarios',
+      },
     ]);
   }, []);
 

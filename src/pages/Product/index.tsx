@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Link as RouteLink} from 'react-router-dom';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
 import {
@@ -11,10 +12,12 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Link,
 } from '@mui/material';
 import {
   Button,
   DataGrid,
+  DetailInfo,
   FilterData,
   InputSearch,
   LinearDeterminate,
@@ -166,9 +169,6 @@ export const Product: React.FC = () => {
     <LinearDeterminate />;
   }
 
-  // eslint-disable-next-line
-  console.log('*** totalValues', totalValues);
-
   return (
     <>
       <Grid container spacing={3}>
@@ -187,6 +187,34 @@ export const Product: React.FC = () => {
               disabled={loading}
             />
           </Stack>
+        </Grid>
+
+        <Grid item xs={6} sm={3}>
+          <DetailInfo
+            data={totalValues?.totalQuantity || 0}
+            title="Quantidade de produtos"
+          />
+        </Grid>
+
+        <Grid item xs={6} sm={3}>
+          <DetailInfo
+            data={`R$ ${totalValues?.totalPurchaseValue.toFixed(2) || 0}`}
+            title="Valor total de compra"
+          />
+        </Grid>
+
+        <Grid item xs={6} sm={3}>
+          <DetailInfo
+            data={`R$ ${totalValues?.totalSaleValue.toFixed(2) || 0}`}
+            title="Valor total de venda"
+          />
+        </Grid>
+
+        <Grid item xs={6} sm={3}>
+          <DetailInfo
+            data={`R$ ${totalValues?.totalProfitValue.toFixed(2) || 0}`}
+            title="Valor total de lucro"
+          />
         </Grid>
 
         <Grid item xs={12}>
@@ -321,7 +349,13 @@ export const Product: React.FC = () => {
               {
                 field: 'seller',
                 headerName: 'Vendedor',
-                renderCell: (params) => params.row.seller?.name,
+                renderCell: (params) => (
+                  <Link
+                    component={RouteLink}
+                    to={`/vendedores/${params.row.seller?.id}`}>
+                    {params.row.seller?.name}
+                  </Link>
+                ),
                 minWidth: 180,
               },
               {

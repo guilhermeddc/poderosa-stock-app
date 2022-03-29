@@ -9,6 +9,7 @@ const Product = lazy(() => import('pages/Product'));
 const Sellers = lazy(() => import('pages/Sellers'));
 const SellerDetail = lazy(() => import('pages/Sellers/Detail'));
 const Providers = lazy(() => import('pages/Providers'));
+const Users = lazy(() => import('pages/Users'));
 
 export const PrivateRoutes: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ export const PrivateRoutes: React.FC = () => {
           <Route path="vendedores" element={<Sellers />} />
           <Route path="vendedores/:id" element={<SellerDetail />} />
           <Route path="fornecedores" element={<Providers />} />
+          <Route path="usuarios" element={<Users />} />
 
           <Route path="*" element={() => <Navigate to="/" replace />} />
         </Routes>

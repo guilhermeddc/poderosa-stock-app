@@ -14,6 +14,8 @@ export * from './UI/FilterData';
 export * from './UI/LinearDeterminate';
 export * from './UI/Title';
 export * from './UI/Subtitle';
+export * from './UI/DetailInfo';
+export * from './UI/Notification';
 
 export * from './Form/Checkbox';
 export * from './Form/MultiSelect';

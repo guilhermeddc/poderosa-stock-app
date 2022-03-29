@@ -1,12 +1,22 @@
 import React from 'react';
 
-import {Box, Button, Grid, Paper, Typography} from '@mui/material';
+import {
+  Box,
+  Button,
+  Grid,
+  Paper,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import {background, google, logo} from 'shared/assets';
 import {Copyright} from 'shared/components';
 import {useAuth} from 'shared/hooks';
 
 export const Login: React.FC = () => {
   const {signIn} = useAuth();
+
+  const matches = useMediaQuery('(min-width:600px)');
+
   return (
     <Grid container component="main" sx={{height: '100vh'}}>
       <Grid
@@ -36,7 +46,11 @@ export const Login: React.FC = () => {
             height: '100%',
           }}>
           <Box>
-            <img src={logo} alt="logo poderosa stock" width={350} />
+            <img
+              src={logo}
+              alt="logo poderosa stock"
+              width={matches ? 350 : 250}
+            />
           </Box>
 
           <Box component="form" noValidate sx={{mt: 5}}>

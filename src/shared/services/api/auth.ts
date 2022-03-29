@@ -7,22 +7,19 @@ import {
   signOut as FSignOut,
   User,
 } from 'firebase/auth';
-import {getDocs} from 'firebase/firestore';
-import {adminDB, auth} from 'shared/services/firebase';
+import {doc, getDoc} from 'firebase/firestore';
+import {auth, userDB} from 'shared/services/firebase';
 
-export interface IUser {
-  user: User;
-  admin: boolean;
-}
+import {notificationService} from './notifications';
+import {IUser, userService} from './user';
 
 const provider = new GoogleAuthProvider();
 
-const isAdmin = async (uid: string): Promise<boolean> => {
+const getUser = async (uid: string): Promise<IUser> => {
   try {
-    const adminSnapshot = await getDocs(adminDB);
-    const adminList = adminSnapshot.docs.map((doc) => doc.data());
+    const user = await getDoc(doc(userDB, uid));
 
-    return adminList.filter((item) => item.id === uid).length > 0;
+    return user.data() as IUser;
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
@@ -34,11 +31,32 @@ const signIn = async (): Promise<IUser> => {
   try {
     const resUser = await signInWithPopup(auth, provider);
 
-    const user = resUser.user;
+    const authUser: User = resUser.user;
 
-    const admin = await isAdmin(resUser.user.uid);
+    const user = await getUser(resUser.user.uid);
 
-    return {user, admin};
+    if (authUser && !user) {
+      await userService.createUserByGoogle({
+        id: authUser.uid,
+        name: authUser.displayName || '',
+        email: authUser.email || '',
+        imageUrl: authUser.photoURL || '',
+        phone: '',
+        cpf: '',
+        type: '',
+      });
+
+      await notificationService.createNotification({
+        title: 'Novo usuário',
+        body: `Usuário ${resUser.user.displayName} criado e esperando aprovação`,
+        link: `/users/profile/${resUser.user.uid}`,
+        icon: 'add_alert',
+      });
+
+      await signOut();
+    }
+
+    return user;
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;

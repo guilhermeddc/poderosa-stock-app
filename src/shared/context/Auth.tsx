@@ -1,13 +1,13 @@
 import React, {createContext, useCallback, useEffect, useState} from 'react';
 
-import {User} from 'firebase/auth';
 import {feedback} from 'shared/services/alertService';
 import {authService} from 'shared/services/api/auth';
+import {IUser} from 'shared/services/api/user';
 
 export interface IAuthContext {
   authenticated: boolean;
   isAdmin: boolean;
-  user: User;
+  user: IUser;
   signIn: () => Promise<void>;
   signOut: () => void;
 }
@@ -15,18 +15,17 @@ export interface IAuthContext {
 export const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 
 export const AuthProvider: React.FC = ({children}) => {
-  const [user, setUser] = useState<User>({} as User);
+  const [user, setUser] = useState<IUser>({} as IUser);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const handleSignIn = useCallback(async () => {
     try {
       const response = await authService.signIn();
 
-      localStorage.setItem('@user', JSON.stringify(response.user));
-      localStorage.setItem('@admin', JSON.stringify(response.admin));
+      localStorage.setItem('@user', JSON.stringify(response));
 
-      setUser(response.user);
-      setIsAdmin(response.admin);
+      setUser(response);
+      setIsAdmin(response.type === 'admin');
     } catch (error) {
       feedback(String(error), 'error');
     }
@@ -36,7 +35,9 @@ export const AuthProvider: React.FC = ({children}) => {
     try {
       authService.signOut();
 
-      setUser({} as User);
+      localStorage.removeItem('@user');
+
+      setUser({} as IUser);
     } catch (error) {
       feedback(String(error), 'error');
     }
@@ -44,10 +45,11 @@ export const AuthProvider: React.FC = ({children}) => {
 
   useEffect(() => {
     const userStorage = localStorage.getItem('@user');
-    const adminStorage = localStorage.getItem('@admin');
 
-    userStorage && setUser(JSON.parse(userStorage) as User);
-    adminStorage && setIsAdmin(!!JSON.parse(adminStorage));
+    if (userStorage) {
+      setUser(JSON.parse(userStorage) as IUser);
+      setIsAdmin((JSON.parse(userStorage) as IUser).type === 'admin');
+    }
   }, []);
 
   return (
@@ -55,7 +57,8 @@ export const AuthProvider: React.FC = ({children}) => {
       value={{
         signIn: handleSignIn,
         signOut: handleSignOut,
-        authenticated: !!user.uid,
+        authenticated:
+          !!user.id && (user.type === 'admin' || user.type === 'seller'),
         isAdmin,
         user,
       }}>

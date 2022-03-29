@@ -58,22 +58,14 @@ const getProducts = async (): Promise<IListProduct> => {
     const productList = await Promise.all(
       productSnapshot.docs.map(async (data) => {
         return {
+          ...data.data(),
           id: data.id,
-          code: data.data().code,
-          description: data.data().description,
-          purchaseValue: data.data().purchaseValue,
-          saleValue: data.data().saleValue,
-          profitValue: data.data().profitValue,
-          quantity: data.data().quantity,
-          size: data.data().size,
           seller: data.data().seller
             ? await sellerService.getSeller(data.data().seller)
             : null,
           provider: await providerService.getProvider(data.data().provider),
-          sold: data.data().sold,
-          travel: data.data().travel,
         };
-      }),
+      }) as Promise<IProduct>[],
     );
 
     let totalSaleValue = 0;
@@ -160,6 +152,10 @@ const createProduct = async (
       if (!provider) {
         throw new Error('Fornecedor não encontrado');
       }
+    }
+
+    if (payload.quantity < 1) {
+      throw new Error('Quantidade inválida');
     }
 
     if (payload.quantity > 1) {
