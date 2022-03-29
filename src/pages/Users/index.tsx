@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {AddRounded, EditRounded, DeleteRounded} from '@mui/icons-material';
+import {EditRounded, DeleteRounded} from '@mui/icons-material';
 import {Grid, Tooltip, IconButton, Avatar} from '@mui/material';
 import {
   Title,
@@ -14,7 +14,7 @@ import {cpfMask, phoneMask} from 'shared/helpers/masks';
 import {feedback} from 'shared/services/alertService';
 import {IUser, userService} from 'shared/services/api/user';
 
-import {ModalUser} from './components';
+import {ModalUser} from './components/ModalUser';
 
 const Users: React.FC = () => {
   const [data, setData] = useState<IUser[]>([]);

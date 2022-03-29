@@ -1,19 +1,12 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
+import {VisibilityRounded} from '@mui/icons-material';
+import {Grid, IconButton, Tooltip} from '@mui/material';
 import {
-  AddRounded,
-  DeleteRounded,
-  EditRounded,
-  VisibilityRounded,
-} from '@mui/icons-material';
-import {Grid, IconButton, Stack, Tooltip, useMediaQuery} from '@mui/material';
-import {
-  Button,
   DataGrid,
   FilterData,
   InputSearch,
-  ModalConfirm,
   Subtitle,
   Title,
 } from 'shared/components';
@@ -21,78 +14,25 @@ import {cpfMask, phoneMask} from 'shared/helpers/masks';
 import {feedback} from 'shared/services/alertService';
 import {ISeller, sellerService} from 'shared/services/api/seller';
 
-import {ModalSeller} from './ModalSeller';
-
 export const Sellers: React.FC = () => {
   const [data, setData] = useState<ISeller[]>([]);
   const [filter, setFilter] = useState('');
-  const [seller, setSeller] = useState<ISeller | undefined>();
-  const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
-  const [idDeleted, setIdDeleted] = useState('');
-  const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
-  const matches = useMediaQuery('(min-width:600px)');
   const navigate = useNavigate();
 
   const getData = useCallback(async () => {
     try {
-      setLoading(true);
-
       const response = await sellerService.getSellers();
 
       setData(response);
     } catch (error) {
       feedback('Erro ao carregar os dados', 'error');
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     getData();
   }, [getData]);
-
-  const handleEditModal = useCallback((row: ISeller) => {
-    setSeller(row);
-
-    setOpenModal(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setSeller(undefined);
-
-    setOpenModal(false);
-  }, []);
-
-  const handleClickModal = useCallback(() => {
-    setSeller(undefined);
-
-    setOpenModal(false);
-    getData();
-  }, [getData]);
-
-  const handleDelete = useCallback((id: string) => {
-    setOpenModalConfirmExclude(true);
-
-    setIdDeleted(id);
-  }, []);
-
-  const handleConfirmDeleted = useCallback(async () => {
-    try {
-      setLoading(true);
-      await sellerService.deleteSeller(idDeleted);
-
-      await getData();
-
-      feedback('Registro excluído com sucesso', 'success');
-    } catch (error) {
-      feedback('Erro ao tentar excluir', 'error');
-    }
-    setLoading(false);
-    setIdDeleted('');
-    setOpenModalConfirmExclude(false);
-  }, [getData, idDeleted]);
 
   const filteredData = useMemo(() => {
     if (data) {
@@ -108,21 +48,8 @@ export const Sellers: React.FC = () => {
   return (
     <>
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
           <Title title="Gestão de vendedores" />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button
-              fullWidth={!matches}
-              label="Adicionar"
-              startIcon={<AddRounded />}
-              variant="outlined"
-              onClick={() => setOpenModal(true)}
-              disabled={loading}
-            />
-          </Stack>
         </Grid>
 
         <Grid item xs={12}>
@@ -150,18 +77,6 @@ export const Sellers: React.FC = () => {
                 minWidth: 150,
                 renderCell: (params) => (
                   <>
-                    <Tooltip title="Editar">
-                      <IconButton onClick={() => handleEditModal(params.row)}>
-                        <EditRounded color="primary" />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Deletar">
-                      <IconButton onClick={() => handleDelete(params.row.id)}>
-                        <DeleteRounded color="primary" />
-                      </IconButton>
-                    </Tooltip>
-
                     <Tooltip title="Detalhes">
                       <IconButton
                         onClick={() =>
@@ -200,22 +115,6 @@ export const Sellers: React.FC = () => {
           />
         </Grid>
       </Grid>
-
-      <ModalSeller
-        openModal={openModal}
-        onClick={handleClickModal}
-        onClose={handleCloseModal}
-        initialData={seller}
-      />
-
-      <ModalConfirm
-        opened={openModalConfirmExclude}
-        onClick={handleConfirmDeleted}
-        onClose={() => {
-          setOpenModalConfirmExclude(false), setIdDeleted('');
-        }}
-        loading={loading}
-      />
     </>
   );
 };

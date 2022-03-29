@@ -1,54 +1,44 @@
-import {config, https} from 'firebase-functions';
-import {firestore, initializeApp} from 'firebase-admin';
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
-initializeApp(config().firebase);
+admin.initializeApp(functions.config().firebase);
 
-export interface ICreateProduct {
-  code: string;
-  description: string;
-  quantity: number;
-  purchaseValue: number;
-  saleValue: number;
-  profitValue: number;
-  size: string;
-  seller: string;
-  provider: string;
-  sold: boolean;
-}
+export const getSellerProductData = functions.https.onCall(
+  async (data, context) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'The function must be called while authenticated.',
+      );
+    }
 
-export const getSellerProductData = https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new https.HttpsError(
-      'failed-precondition',
-      'The function must be called while authenticated.',
-    );
-  }
+    const seller = data.seller;
+    const products = await admin
+      .firestore()
+      .collection('products')
+      .where('seller', '==', seller)
+      .get();
 
-  const seller = data.seller;
-  const products = await firestore()
-    .collection('products')
-    .where('seller', '==', seller)
-    .get();
+    const productsData = products.docs.map((doc) => doc.data());
 
-  const productsData = products.docs.map((doc) => doc.data());
+    let totalSaleValue = 0;
+    let totalProfitValue = 0;
+    let totalQuantity = 0;
+    let totalPurchaseValue = 0;
 
-  let totalSaleValue = 0;
-  let totalProfitValue = 0;
-  let totalQuantity = 0;
-  let totalPurchaseValue = 0;
+    productsData.forEach((product) => {
+      totalSaleValue += product.saleValue;
+      totalProfitValue += product.profitValue;
+      totalQuantity += Number(product.quantity);
+      totalPurchaseValue += product.purchaseValue;
+    });
 
-  productsData.forEach((product) => {
-    totalSaleValue += product.saleValue;
-    totalProfitValue += product.profitValue;
-    totalQuantity += Number(product.quantity);
-    totalPurchaseValue += product.purchaseValue;
-  });
-
-  return {
-    products: productsData,
-    totalSaleValue,
-    totalProfitValue,
-    totalQuantity,
-    totalPurchaseValue,
-  };
-});
+    return {
+      products: productsData,
+      totalSaleValue,
+      totalProfitValue,
+      totalQuantity,
+      totalPurchaseValue,
+    };
+  },
+);
