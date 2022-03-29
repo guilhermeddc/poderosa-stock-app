@@ -22,10 +22,13 @@ export const AuthProvider: React.FC = ({children}) => {
     try {
       const response = await authService.signIn();
 
+      // eslint-disable-next-line
+      console.log('*** response', response);
+
       localStorage.setItem('@user', JSON.stringify(response));
 
       setUser(response);
-      setIsAdmin(response.type === 'admin');
+      setIsAdmin(response.type.includes('admin'));
     } catch (error) {
       feedback(String(error), 'error');
     }
@@ -48,7 +51,7 @@ export const AuthProvider: React.FC = ({children}) => {
 
     if (userStorage) {
       setUser(JSON.parse(userStorage) as IUser);
-      setIsAdmin((JSON.parse(userStorage) as IUser).type === 'admin');
+      setIsAdmin((JSON.parse(userStorage) as IUser).type.includes('admin'));
     }
   }, []);
 
@@ -58,7 +61,8 @@ export const AuthProvider: React.FC = ({children}) => {
         signIn: handleSignIn,
         signOut: handleSignOut,
         authenticated:
-          !!user.id && (user.type === 'admin' || user.type === 'seller'),
+          !!user.id &&
+          (user.type.includes('admin') || user.type.includes('seller')),
         isAdmin,
         user,
       }}>

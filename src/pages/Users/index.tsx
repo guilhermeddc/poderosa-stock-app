@@ -11,6 +11,7 @@ import {
   ModalConfirm,
 } from 'shared/components';
 import {cpfMask, phoneMask} from 'shared/helpers/masks';
+import {userType} from 'shared/helpers/userType';
 import {feedback} from 'shared/services/alertService';
 import {IUser, userService} from 'shared/services/api/user';
 
@@ -174,13 +175,8 @@ const Users: React.FC = () => {
               {
                 field: 'type',
                 headerName: 'Tipo',
-                minWidth: 130,
-                renderCell: (params) =>
-                  params.row.type === 'seller'
-                    ? 'Vendedor'
-                    : params.row.type === 'admin'
-                    ? 'Admin'
-                    : '',
+                minWidth: 280,
+                renderCell: (params) => userType(params.row.type),
               },
             ]}
             rows={filteredData || []}

@@ -98,12 +98,13 @@ export const ModalUser: React.FC<IProps> = ({
           </Grid>
 
           <Grid item xs={12}>
-            <Select name="type" label="Tipo de usuário">
+            <Select name="type" label="Tipo de usuário" multiple>
               <MenuItem value="" disabled defaultChecked>
                 Selecione uma opção
               </MenuItem>
               <MenuItem value="admin">Administrador</MenuItem>
               <MenuItem value="seller">Vendedor</MenuItem>
+              <MenuItem value="consumer">Cliente</MenuItem>
             </Select>
           </Grid>
         </Grid>

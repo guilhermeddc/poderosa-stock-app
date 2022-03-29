@@ -12,7 +12,7 @@ export interface IUser {
   imageUrl?: string;
   admin?: boolean;
   seller?: boolean;
-  type: string;
+  type: string[];
 }
 
 const createUserByGoogle = async (payload: IUser): Promise<IRequestResult> => {

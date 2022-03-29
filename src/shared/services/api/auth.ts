@@ -43,7 +43,7 @@ const signIn = async (): Promise<IUser> => {
         imageUrl: authUser.photoURL || '',
         phone: '',
         cpf: '',
-        type: '',
+        type: [],
       });
 
       await notificationService.createNotification({
