@@ -60,9 +60,7 @@ export const AuthProvider: React.FC = ({children}) => {
       value={{
         signIn: handleSignIn,
         signOut: handleSignOut,
-        authenticated:
-          !!user.id &&
-          (user.type.includes('admin') || user.type.includes('seller')),
+        authenticated: !!user.id && (isAdmin || isSeller),
         isAdmin: isAdmin || (isAdmin && isSeller),
         isSeller: !isAdmin && isSeller,
         user,
