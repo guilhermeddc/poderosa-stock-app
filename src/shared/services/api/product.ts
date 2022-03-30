@@ -8,9 +8,8 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
-import {httpsCallable} from 'firebase/functions';
 import {IRequestResult} from 'shared/interfaces';
-import {productDB, functions} from 'shared/services/firebase';
+import {productDB} from 'shared/services/firebase';
 
 import {IProvider, providerService} from './provider';
 import {ISeller, sellerService} from './seller';
@@ -106,26 +105,6 @@ const getProduct = async (id: string): Promise<IProduct> => {
   }
 };
 
-const createProductForCloudFunctions = async (payload: ICreateProduct) => {
-  try {
-    const createProduct = httpsCallable(functions, 'createProduct');
-
-    const result = await createProduct({
-      ...payload,
-      sold: false,
-      quantity: 2,
-      purchaseValue: Number(payload.purchaseValue),
-      saleValue: Number(payload.saleValue),
-    });
-
-    return result;
-  } catch (error: any) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    throw new Error(`${errorCode} ${errorMessage}`);
-  }
-};
-
 const createProduct = async (
   payload: ICreateProduct,
 ): Promise<IRequestResult> => {
@@ -194,10 +173,24 @@ const updateProduct = async (
   try {
     await updateDoc(doc(productDB, id), {
       ...payload,
-      sold: false,
       purchaseValue: Number(payload.purchaseValue),
       saleValue: Number(payload.saleValue),
     });
+
+    return {success: true};
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
+const changeSoldProduct = async (
+  id: string,
+  sold: boolean,
+): Promise<IRequestResult> => {
+  try {
+    await updateDoc(doc(productDB, id), {sold});
 
     return {success: true};
   } catch (error: any) {
@@ -225,5 +218,5 @@ export const productService = {
   createProduct,
   deleteProduct,
   updateProduct,
-  createProductForCloudFunctions,
+  changeSoldProduct,
 };

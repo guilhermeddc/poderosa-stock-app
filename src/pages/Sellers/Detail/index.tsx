@@ -31,7 +31,7 @@ export const Detail: React.FC = () => {
 
   const {data, isLoading} = useQuery(
     ['seller', id],
-    () => sellerService.getSeller(id),
+    () => sellerService.getSeller(String(id)),
     {enabled: !!id},
   );
 

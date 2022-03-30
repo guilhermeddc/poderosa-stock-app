@@ -34,7 +34,7 @@ const getSellers = async (): Promise<IUser[]> => {
   }
 };
 
-const getSeller = async (id: string | undefined): Promise<ISeller> => {
+const getSeller = async (id: string): Promise<ISeller> => {
   try {
     const seller = await getDoc(doc(userDB, id));
 

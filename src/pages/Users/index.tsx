@@ -109,6 +109,10 @@ const Users: React.FC = () => {
                 align: 'center',
                 headerAlign: 'center',
                 minWidth: 150,
+                disableColumnMenu: true,
+                disableReorder: true,
+                disableExport: true,
+                sortable: false,
                 renderCell: (params) => (
                   <>
                     <Tooltip title="Editar">
