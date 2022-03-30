@@ -12,6 +12,7 @@ interface IProps {
   title?: string;
   term?: string;
   labelSaveButton?: string;
+  description?: string;
 }
 
 export const ModalConfirm: React.FC<IProps> = ({
@@ -22,7 +23,7 @@ export const ModalConfirm: React.FC<IProps> = ({
   title = 'Confirmação de exclusão',
   term = 'registro',
   labelSaveButton = 'Excluir',
-  children,
+  description,
 }) => {
   return (
     <>
@@ -35,11 +36,11 @@ export const ModalConfirm: React.FC<IProps> = ({
         labelSaveButton={labelSaveButton}
         labelCloseButton="Cancelar"
         title={title}>
-        {children ? (
-          children
-        ) : (
-          <Typography>Tem certeza que deseja excluir este {term}?</Typography>
-        )}
+        <Typography>
+          {description
+            ? description
+            : `Tem certeza que deseja excluir este ${term}?`}
+        </Typography>
       </Modal>
     </>
   );

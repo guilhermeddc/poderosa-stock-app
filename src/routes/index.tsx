@@ -7,9 +7,10 @@ import {PrivateRoutes} from './private.routes';
 import {PublicRoutes} from './public.routes';
 
 export const Routes: React.FC = () => {
-  const {authenticated, isAdmin} = useAuth();
+  const {authenticated, isAdmin, isSeller} = useAuth();
 
-  const Routes = authenticated && isAdmin ? PrivateRoutes : PublicRoutes;
+  const Routes =
+    authenticated && (isAdmin || isSeller) ? PrivateRoutes : PublicRoutes;
 
   return (
     <BrowserRouter>

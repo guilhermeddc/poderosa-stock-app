@@ -50,8 +50,11 @@ export const AuthProvider: React.FC = ({children}) => {
     const userStorage = localStorage.getItem('@user');
 
     if (userStorage) {
-      setUser(JSON.parse(userStorage) as IUser);
-      setIsAdmin((JSON.parse(userStorage) as IUser).type.includes('admin'));
+      setUser(JSON.parse(userStorage));
+      setIsAdmin(JSON.parse(userStorage).type.includes('k96XdK1e3zBOY5dimeE9'));
+      setIsSeller(
+        JSON.parse(userStorage).type.includes('8G5ap05MOUpfLg3OqrTl'),
+      );
     }
   }, []);
 
@@ -60,7 +63,7 @@ export const AuthProvider: React.FC = ({children}) => {
       value={{
         signIn: handleSignIn,
         signOut: handleSignOut,
-        authenticated: !!user.id && (isAdmin || isSeller),
+        authenticated: !!user.id,
         isAdmin: isAdmin || (isAdmin && isSeller),
         isSeller: !isAdmin && isSeller,
         user,

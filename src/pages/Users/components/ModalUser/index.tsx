@@ -3,6 +3,7 @@ import React, {useCallback, useRef} from 'react';
 import {Grid, MenuItem} from '@mui/material';
 import {FormHandles} from '@unform/core';
 import {Form, Modal, NumberFormat, Select, TextField} from 'shared/components';
+import {userId} from 'shared/constants';
 import getValidationErrors from 'shared/helpers/getValidationErrors';
 import {IUser, userService} from 'shared/services/api/user';
 import * as Yup from 'yup';
@@ -102,9 +103,9 @@ export const ModalUser: React.FC<IProps> = ({
               <MenuItem value="" disabled defaultChecked>
                 Selecione uma opção
               </MenuItem>
-              <MenuItem value="admin">Administrador</MenuItem>
-              <MenuItem value="seller">Vendedor</MenuItem>
-              <MenuItem value="consumer">Cliente</MenuItem>
+              <MenuItem value={userId.admin}>Administrador</MenuItem>
+              <MenuItem value={userId.seller}>Vendedor</MenuItem>
+              <MenuItem value={userId.customer}>Cliente</MenuItem>
             </Select>
           </Grid>
         </Grid>
