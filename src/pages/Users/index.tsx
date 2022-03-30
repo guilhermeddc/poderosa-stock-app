@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
+import {useMutation, useQuery, useQueryClient} from 'react-query';
 
 import {EditRounded, DeleteRounded} from '@mui/icons-material';
 import {Grid, Tooltip, IconButton, Avatar} from '@mui/material';
@@ -18,31 +19,29 @@ import {IUser, userService} from 'shared/services/api/user';
 import {ModalUser} from './components/ModalUser';
 
 const Users: React.FC = () => {
-  const [data, setData] = useState<IUser[]>([]);
   const [filter, setFilter] = useState('');
   const [user, setUser] = useState<IUser | undefined>();
-  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
-  const getData = useCallback(async () => {
-    try {
-      setLoading(true);
+  const queryClient = useQueryClient();
 
-      const response = await userService.getUsers();
+  const {data} = useQuery('users', () => userService.getUsers());
 
-      setData(response);
-    } catch (error) {
-      feedback('Erro ao carregar os dados', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  const mutation = useMutation(() => userService.deleteUser(idDeleted), {
+    onSuccess: () => {
+      queryClient.invalidateQueries('users');
+      setIdDeleted('');
+      setOpenModalConfirmExclude(false);
+      feedback('Registro excluído com sucesso', 'success');
+    },
+    onError: () => {
+      setIdDeleted('');
+      setOpenModalConfirmExclude(false);
+      feedback('Erro ao excluir registro', 'error');
+    },
+  });
 
   const handleEditModal = useCallback((row: IUser) => {
     setUser(row);
@@ -60,30 +59,14 @@ const Users: React.FC = () => {
     setUser(undefined);
 
     setOpenModal(false);
-    getData();
-  }, [getData]);
+    queryClient.invalidateQueries('users');
+  }, [queryClient]);
 
   const handleDelete = useCallback((id: string) => {
     setOpenModalConfirmExclude(true);
 
     setIdDeleted(id);
   }, []);
-
-  const handleConfirmDeleted = useCallback(async () => {
-    try {
-      setLoading(true);
-      await userService.deleteUser(idDeleted);
-
-      await getData();
-
-      feedback('Registro excluído com sucesso', 'success');
-    } catch (error) {
-      feedback('Erro ao tentar excluir', 'error');
-    }
-    setLoading(false);
-    setIdDeleted('');
-    setOpenModalConfirmExclude(false);
-  }, [getData, idDeleted]);
 
   const filteredData = useMemo(() => {
     if (data) {
@@ -145,7 +128,7 @@ const Users: React.FC = () => {
               {
                 field: 'imageUrl',
                 headerName: 'Imagem',
-                width: 70,
+                width: 75,
                 align: 'center',
                 headerAlign: 'center',
                 renderCell: (params) => <Avatar src={params.row.imageUrl} />,
@@ -193,11 +176,11 @@ const Users: React.FC = () => {
 
       <ModalConfirm
         opened={openModalConfirmExclude}
-        onClick={handleConfirmDeleted}
+        onClick={mutation.mutate}
         onClose={() => {
           setOpenModalConfirmExclude(false), setIdDeleted('');
         }}
-        loading={loading}
+        loading={mutation.isLoading}
       />
     </>
   );

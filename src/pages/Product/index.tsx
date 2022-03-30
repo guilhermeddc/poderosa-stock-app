@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
+import {useQuery, useQueryClient, useMutation} from 'react-query';
 import {Link as RouteLink} from 'react-router-dom';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
@@ -29,71 +30,54 @@ import {renderNumber} from 'shared/helpers/renderNumber';
 import {feedback} from 'shared/services/alertService';
 import {IProduct, productService} from 'shared/services/api/product';
 import {IProvider, providerService} from 'shared/services/api/provider';
-import {ISeller, sellerService} from 'shared/services/api/seller';
+import {sellerService} from 'shared/services/api/seller';
+import {IUser} from 'shared/services/api/user';
 
 import {ModalProduct} from './ModalProduct';
 
-interface ITotalValues {
-  totalSaleValue: number;
-  totalProfitValue: number;
-  totalQuantity: number;
-  totalPurchaseValue: number;
-}
-
 export const Product: React.FC = () => {
-  const [data, setData] = useState<IProduct[]>([]);
-  const [totalValues, setTotalValues] = useState<ITotalValues | undefined>();
   const [product, setProduct] = useState<IProduct | undefined>();
-  const [sellers, setSellers] = useState<ISeller[]>([]);
   const [seller, setSeller] = useState('');
-  const [providers, setProviders] = useState<IProvider[]>([]);
   const [provider, setProvider] = useState('');
   const [filter, setFilter] = useState('');
-  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
   const matches = useMediaQuery('(min-width:600px)');
+  const queryClient = useQueryClient();
 
-  const getData = useCallback(async () => {
-    try {
-      setLoading(true);
+  const {data, isLoading} = useQuery('products', () =>
+    productService.getProducts(),
+  );
+  const {data: sellers} = useQuery('sellers', () => sellerService.getSellers());
+  const {data: providers} = useQuery('providers', () =>
+    providerService.getProviders(),
+  );
 
-      const resData = await productService.getProducts();
-      const resSeller = await sellerService.getSellers();
-      const resProvider = await providerService.getProviders();
-
-      setProviders(resProvider);
-      setSellers(resSeller);
-      setData(resData.products);
-
-      setTotalValues({
-        totalSaleValue: resData.totalSaleValue,
-        totalProfitValue: resData.totalProfitValue,
-        totalQuantity: resData.totalQuantity,
-        totalPurchaseValue: resData.totalPurchaseValue,
-      });
-    } catch (error) {
-      feedback('Erro ao carregar os dados', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  const mutation = useMutation(() => productService.deleteProduct(idDeleted), {
+    onSuccess: () => {
+      queryClient.invalidateQueries('products');
+      setIdDeleted('');
+      setOpenModalConfirmExclude(false);
+      feedback('Registro excluído com sucesso', 'success');
+    },
+    onError: () => {
+      setIdDeleted('');
+      setOpenModalConfirmExclude(false);
+      feedback('Erro ao excluir registro', 'error');
+    },
+  });
 
   const filteredData = useMemo(() => {
-    if (data) {
+    if (data?.products) {
       const itemFiltered = (item: IProduct) =>
         item.description.toLowerCase().includes(filter.toLowerCase()) ||
         item.size.toLowerCase().includes(filter.toLowerCase()) ||
         item.code.toLowerCase().includes(filter.toLowerCase());
 
       if (seller && provider) {
-        return data.filter(
+        return data?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === seller &&
@@ -102,18 +86,18 @@ export const Product: React.FC = () => {
       }
 
       if (seller) {
-        return data.filter(
+        return data?.products.filter(
           (item) => itemFiltered(item) && item.seller?.id === seller,
         );
       }
 
       if (provider) {
-        return data.filter(
+        return data?.products.filter(
           (item) => itemFiltered(item) && item.provider.id === provider,
         );
       }
 
-      return data.filter((item) => itemFiltered(item));
+      return data?.products.filter((item) => itemFiltered(item));
     }
     return [];
   }, [data, filter, provider, seller]);
@@ -140,8 +124,8 @@ export const Product: React.FC = () => {
     setProduct(undefined);
 
     setOpenModal(false);
-    getData();
-  }, [getData]);
+    queryClient.invalidateQueries('products');
+  }, [queryClient]);
 
   const handleDelete = useCallback((id: string) => {
     setOpenModalConfirmExclude(true);
@@ -149,24 +133,8 @@ export const Product: React.FC = () => {
     setIdDeleted(id);
   }, []);
 
-  const handleConfirmDeleted = useCallback(async () => {
-    try {
-      setLoading(true);
-      await productService.deleteProduct(idDeleted);
-
-      await getData();
-
-      feedback('Registro excluído com sucesso', 'success');
-    } catch (error) {
-      feedback('Erro ao tentar excluir', 'error');
-    }
-    setLoading(false);
-    setIdDeleted('');
-    setOpenModalConfirmExclude(false);
-  }, [getData, idDeleted]);
-
-  if (loading || data.length === 0) {
-    <LinearDeterminate />;
+  if (isLoading) {
+    return <LinearDeterminate />;
   }
 
   return (
@@ -184,35 +152,35 @@ export const Product: React.FC = () => {
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => setOpenModal(true)}
-              disabled={loading}
+              disabled={isLoading}
             />
           </Stack>
         </Grid>
 
         <Grid item xs={6} sm={3}>
           <DetailInfo
-            data={totalValues?.totalQuantity || 0}
+            data={data?.totalQuantity || 0}
             title="Quantidade de produtos"
           />
         </Grid>
 
         <Grid item xs={6} sm={3}>
           <DetailInfo
-            data={`R$ ${totalValues?.totalPurchaseValue.toFixed(2) || 0}`}
+            data={`R$ ${data?.totalPurchaseValue.toFixed(2) || 0}`}
             title="Valor total de compra"
           />
         </Grid>
 
         <Grid item xs={6} sm={3}>
           <DetailInfo
-            data={`R$ ${totalValues?.totalSaleValue.toFixed(2) || 0}`}
+            data={`R$ ${data?.totalSaleValue.toFixed(2) || 0}`}
             title="Valor total de venda"
           />
         </Grid>
 
         <Grid item xs={6} sm={3}>
           <DetailInfo
-            data={`R$ ${totalValues?.totalProfitValue.toFixed(2) || 0}`}
+            data={`R$ ${data?.totalProfitValue.toFixed(2) || 0}`}
             title="Valor total de lucro"
           />
         </Grid>
@@ -375,17 +343,17 @@ export const Product: React.FC = () => {
         onClick={handleClickModal}
         onClose={handleCloseModal}
         initialData={product}
-        sellers={sellers}
-        providers={providers}
+        sellers={sellers as IUser[]}
+        providers={providers as IProvider[]}
       />
 
       <ModalConfirm
         opened={openModalConfirmExclude}
-        onClick={handleConfirmDeleted}
+        onClick={mutation.mutate}
         onClose={() => {
           setOpenModalConfirmExclude(false), setIdDeleted('');
         }}
-        loading={loading}
+        loading={mutation.isLoading}
       />
     </>
   );

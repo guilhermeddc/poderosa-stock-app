@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
+import {useQueryClient, useQuery, useMutation} from 'react-query';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
 import {Grid, IconButton, Stack, Tooltip, useMediaQuery} from '@mui/material';
@@ -7,6 +8,7 @@ import {
   DataGrid,
   FilterData,
   InputSearch,
+  LinearDeterminate,
   ModalConfirm,
   Subtitle,
   Title,
@@ -18,33 +20,35 @@ import {IProvider, providerService} from 'shared/services/api/provider';
 import {ModalProvider} from './ModalProvider';
 
 export const Providers: React.FC = () => {
-  const [data, setData] = useState<IProvider[]>([]);
   const [filter, setFilter] = useState('');
   const [provider, setProvider] = useState<IProvider | undefined>();
-  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
   const matches = useMediaQuery('(min-width:600px)');
+  const queryClient = useQueryClient();
 
-  const getData = useCallback(async () => {
-    try {
-      setLoading(true);
+  const {data, isLoading} = useQuery('providers', () =>
+    providerService.getProviders(),
+  );
 
-      const response = await providerService.getProviders();
-
-      setData(response);
-    } catch (error) {
-      feedback('Erro ao carregar os dados', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  const mutation = useMutation(
+    () => providerService.deleteProvider(idDeleted),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('providers');
+        setIdDeleted('');
+        setOpenModalConfirmExclude(false);
+        feedback('Registro excluído com sucesso', 'success');
+      },
+      onError: () => {
+        setIdDeleted('');
+        setOpenModalConfirmExclude(false);
+        feedback('Erro ao excluir registro', 'error');
+      },
+    },
+  );
 
   const handleEditModal = useCallback((row: IProvider) => {
     setProvider(row);
@@ -62,30 +66,14 @@ export const Providers: React.FC = () => {
     setProvider(undefined);
 
     setOpenModal(false);
-    getData();
-  }, [getData]);
+    queryClient.invalidateQueries('providers');
+  }, [queryClient]);
 
   const handleDelete = useCallback((id: string) => {
     setOpenModalConfirmExclude(true);
 
     setIdDeleted(id);
   }, []);
-
-  const handleConfirmDeleted = useCallback(async () => {
-    try {
-      setLoading(true);
-      await providerService.deleteProvider(idDeleted);
-
-      await getData();
-
-      feedback('Registro excluído com sucesso', 'success');
-    } catch (error) {
-      feedback('Erro ao tentar excluir', 'error');
-    }
-    setLoading(false);
-    setIdDeleted('');
-    setOpenModalConfirmExclude(false);
-  }, [getData, idDeleted]);
 
   const filteredData = useMemo(() => {
     if (data) {
@@ -97,6 +85,10 @@ export const Providers: React.FC = () => {
     }
     return [];
   }, [data, filter]);
+
+  if (isLoading) {
+    return <LinearDeterminate />;
+  }
 
   return (
     <>
@@ -113,7 +105,7 @@ export const Providers: React.FC = () => {
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => setOpenModal(true)}
-              disabled={loading}
+              disabled={isLoading}
             />
           </Stack>
         </Grid>
@@ -194,11 +186,11 @@ export const Providers: React.FC = () => {
 
       <ModalConfirm
         opened={openModalConfirmExclude}
-        onClick={handleConfirmDeleted}
+        onClick={mutation.mutate}
         onClose={() => {
           setOpenModalConfirmExclude(false), setIdDeleted('');
         }}
-        loading={loading}
+        loading={mutation.isLoading}
       />
     </>
   );

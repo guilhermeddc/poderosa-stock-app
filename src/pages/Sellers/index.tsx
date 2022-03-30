@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
+import {useQuery} from 'react-query';
 import {useNavigate} from 'react-router-dom';
 
 import {VisibilityRounded} from '@mui/icons-material';
@@ -7,32 +8,21 @@ import {
   DataGrid,
   FilterData,
   InputSearch,
+  LinearDeterminate,
   Subtitle,
   Title,
 } from 'shared/components';
 import {cpfMask, phoneMask} from 'shared/helpers/masks';
-import {feedback} from 'shared/services/alertService';
-import {ISeller, sellerService} from 'shared/services/api/seller';
+import {sellerService} from 'shared/services/api/seller';
 
 export const Sellers: React.FC = () => {
-  const [data, setData] = useState<ISeller[]>([]);
   const [filter, setFilter] = useState('');
 
   const navigate = useNavigate();
 
-  const getData = useCallback(async () => {
-    try {
-      const response = await sellerService.getSellers();
-
-      setData(response);
-    } catch (error) {
-      feedback('Erro ao carregar os dados', 'error');
-    }
-  }, []);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  const {data, isLoading} = useQuery('sellers', () =>
+    sellerService.getSellers(),
+  );
 
   const filteredData = useMemo(() => {
     if (data) {
@@ -44,6 +34,10 @@ export const Sellers: React.FC = () => {
     }
     return [];
   }, [data, filter]);
+
+  if (isLoading) {
+    return <LinearDeterminate />;
+  }
 
   return (
     <>

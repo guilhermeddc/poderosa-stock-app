@@ -7,8 +7,8 @@ import {
   signOut as FSignOut,
   User,
 } from 'firebase/auth';
-import {doc, getDoc} from 'firebase/firestore';
-import {auth, userDB} from 'shared/services/firebase';
+import {doc, getDoc, getDocs} from 'firebase/firestore';
+import {auth, userDB, userTypeDB} from 'shared/services/firebase';
 
 import {notificationService} from './notifications';
 import {IUser, userService} from './user';
@@ -20,6 +20,26 @@ const getUser = async (uid: string): Promise<IUser> => {
     const user = await getDoc(doc(userDB, uid));
 
     return user.data() as IUser;
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
+interface IUserType {
+  id: string;
+  name: string;
+}
+
+const getUserType = async (): Promise<IUserType[]> => {
+  try {
+    const userType = await getDocs(userTypeDB);
+
+    return userType.docs.map((data) => ({
+      id: data.id,
+      name: data.data().name,
+    })) as IUserType[];
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
@@ -94,4 +114,5 @@ export const authService = {
   signIn,
   signOut,
   signPersist,
+  getUserType,
 };

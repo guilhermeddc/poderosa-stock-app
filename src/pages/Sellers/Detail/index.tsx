@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React from 'react';
+import {useQuery} from 'react-query';
 import {useParams} from 'react-router-dom';
 
 import {
@@ -10,46 +11,39 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import {DataGrid, DetailInfo, Subtitle} from 'shared/components';
+import {
+  DataGrid,
+  DetailInfo,
+  LinearDeterminate,
+  Subtitle,
+} from 'shared/components';
 import {cpfMask, phoneMask} from 'shared/helpers/masks';
 import {renderNumber} from 'shared/helpers/renderNumber';
-import {feedback} from 'shared/services/alertService';
-import {IListProduct, ISeller, sellerService} from 'shared/services/api/seller';
+import {sellerService} from 'shared/services/api/seller';
 
 type IParams = {
   id: string;
 };
 
 export const Detail: React.FC = () => {
-  const [data, setData] = useState<ISeller | undefined>();
-  const [productsData, setProductsData] = useState<IListProduct | undefined>();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loading, setLoading] = useState(false);
-
   const {id} = useParams<IParams>();
   const matches = useMediaQuery('(min-width:600px)');
 
-  const getData = useCallback(async () => {
-    try {
-      setLoading(true);
+  const {data, isLoading} = useQuery(
+    ['seller', id],
+    () => sellerService.getSeller(id),
+    {enabled: !!id},
+  );
 
-      if (id) {
-        const response = await sellerService.getSeller(id);
-        const productResponse = await sellerService.getSellerProducts(id);
+  const {data: productsData, isLoading: isLoadingProduct} = useQuery(
+    ['sellerProducts', id],
+    () => sellerService.getSellerProducts(id),
+    {enabled: !!id},
+  );
 
-        setProductsData(productResponse);
-        setData(response);
-      }
-    } catch (error) {
-      feedback('Erro ao carregar os dados', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  if (isLoading || isLoadingProduct) {
+    return <LinearDeterminate />;
+  }
 
   return (
     <Grid container spacing={3}>

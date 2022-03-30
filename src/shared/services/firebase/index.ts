@@ -19,7 +19,7 @@ export const storage = getStorage(app);
 export const functions = getFunctions(app);
 
 export const notificationDB = collection(db, 'notifications');
-export const sellerDB = collection(db, 'sellers');
+export const userTypeDB = collection(db, 'userType');
 export const userDB = collection(db, 'users');
 export const productDB = collection(db, 'products');
 export const providerDB = collection(db, 'providers');

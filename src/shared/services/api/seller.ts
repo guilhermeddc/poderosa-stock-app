@@ -1,15 +1,6 @@
-import {
-  addDoc,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from 'firebase/firestore';
-import {IRequestResult} from 'shared/interfaces';
-import {productDB, sellerDB, userDB} from 'shared/services/firebase';
+import {doc, getDoc, getDocs, query, where} from 'firebase/firestore';
+import {userId} from 'shared/constants';
+import {productDB, userDB} from 'shared/services/firebase';
 
 import {IProduct} from './product';
 import {providerService} from './provider';
@@ -27,7 +18,7 @@ export interface ISeller {
 const getSellers = async (): Promise<IUser[]> => {
   try {
     const seller = await getDocs(
-      query(userDB, where('type', 'array-contains', 'seller')),
+      query(userDB, where('type', 'array-contains', userId.seller)),
     );
 
     return seller.docs.map((data) => {
@@ -43,66 +34,11 @@ const getSellers = async (): Promise<IUser[]> => {
   }
 };
 
-const getSeller = async (id: string): Promise<ISeller> => {
+const getSeller = async (id: string | undefined): Promise<ISeller> => {
   try {
     const seller = await getDoc(doc(userDB, id));
 
     return {id: seller.id, ...seller.data()} as ISeller;
-  } catch (error: any) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    throw new Error(`${errorCode} ${errorMessage}`);
-  }
-};
-
-const createSellerByGoogle = async (
-  payload: ISeller,
-): Promise<IRequestResult> => {
-  try {
-    await addDoc(sellerDB, payload);
-
-    return {success: true};
-  } catch (error: any) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    throw new Error(`${errorCode} ${errorMessage}`);
-  }
-};
-
-const createSeller = async (
-  payload: Omit<ISeller, 'id'>,
-): Promise<IRequestResult> => {
-  try {
-    await addDoc(sellerDB, payload);
-
-    return {success: true};
-  } catch (error: any) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    throw new Error(`${errorCode} ${errorMessage}`);
-  }
-};
-
-const updateSeller = async (
-  id: string,
-  payload: Omit<ISeller, 'id'>,
-): Promise<IRequestResult> => {
-  try {
-    await updateDoc(doc(sellerDB, id), payload);
-
-    return {success: true};
-  } catch (error: any) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    throw new Error(`${errorCode} ${errorMessage}`);
-  }
-};
-
-const deleteSeller = async (id: string): Promise<IRequestResult> => {
-  try {
-    await deleteDoc(doc(sellerDB, id));
-
-    return {success: true};
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
@@ -118,7 +54,9 @@ export interface IListProduct {
   totalPurchaseValue: number;
 }
 
-const getSellerProducts = async (seller: string): Promise<IListProduct> => {
+const getSellerProducts = async (
+  seller: string | undefined,
+): Promise<IListProduct> => {
   try {
     const productSnapshot = await getDocs(
       query(productDB, where('seller', '==', seller)),
@@ -165,9 +103,5 @@ const getSellerProducts = async (seller: string): Promise<IListProduct> => {
 export const sellerService = {
   getSellers,
   getSeller,
-  createSeller,
-  createSellerByGoogle,
-  updateSeller,
-  deleteSeller,
   getSellerProducts,
 };
