@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import {useQuery, useQueryClient} from 'react-query';
 import {useNavigate} from 'react-router-dom';
 
 import {
@@ -25,11 +26,7 @@ import {
 import {logoRet} from 'shared/assets';
 import {Notification} from 'shared/components';
 import {useAuth, useTitle} from 'shared/hooks';
-import {feedback} from 'shared/services/alertService';
-import {
-  INotification,
-  notificationService,
-} from 'shared/services/api/notifications';
+import {notificationService} from 'shared/services/api/notifications';
 
 import {MuiAppBar} from '../styles';
 
@@ -46,31 +43,22 @@ export const AppBar: React.FC<IProps> = ({
   setButtonActive,
   handleDrawerOpen,
 }) => {
-  const [notifications, setNotifications] = useState<INotification[]>([]);
   const [anchorElNotify, setAnchorElNotify] = useState<null | HTMLElement>(
     null,
   );
   const openNotifyMenu = Boolean(anchorElNotify);
 
   const {title} = useTitle();
-  const {user} = useAuth();
+  const {user, isAdmin} = useAuth();
   const theme = useTheme();
   const matches = useMediaQuery('(min-width:600px)');
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const handleGetNotifications = useCallback(async () => {
-    try {
-      const response = await notificationService.getNotifications(user.id);
-
-      setNotifications(response);
-    } catch (error) {
-      feedback('Erro ao carregar os dados', 'error');
-    }
-  }, [user.id]);
-
-  useEffect(() => {
-    handleGetNotifications();
-  }, [handleGetNotifications]);
+  const {data} = useQuery(
+    'notifications',
+    notificationService.getNotifications,
+  );
 
   const handleClickNotifyMenu = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -83,12 +71,12 @@ export const AppBar: React.FC<IProps> = ({
     async (id?: string, link?: string) => {
       id && (await notificationService.markAsRead(id));
 
-      handleGetNotifications();
+      queryClient.invalidateQueries('notifications');
 
       link && navigate(link);
       setAnchorElNotify(null);
     },
-    [handleGetNotifications, navigate],
+    [queryClient, navigate],
   );
 
   const handleOpenMenu = useCallback(() => {
@@ -152,15 +140,17 @@ export const AppBar: React.FC<IProps> = ({
           alignItems="center"
           gap={2}
           paddingRight={3}>
-          <IconButton
-            color="inherit"
-            id="notify-button"
-            disabled={notifications.length === 0}
-            onClick={handleClickNotifyMenu}>
-            <Badge badgeContent={notifications.length} color="error">
-              <NotificationsOutlined />
-            </Badge>
-          </IconButton>
+          {isAdmin && (
+            <IconButton
+              color="inherit"
+              id="notify-button"
+              disabled={data?.length === 0}
+              onClick={handleClickNotifyMenu}>
+              <Badge badgeContent={data?.length} color="error">
+                <NotificationsOutlined />
+              </Badge>
+            </IconButton>
+          )}
 
           <Menu
             sx={{mt: 3, left: matches ? -100 : 0, maxWidth: 350}}
@@ -174,14 +164,14 @@ export const AppBar: React.FC<IProps> = ({
             <MenuItem disabled>
               <Box width={300}>
                 <Typography align="center">
-                  {notifications.length} novas notificações
+                  {data?.length} novas notificações
                 </Typography>
               </Box>
             </MenuItem>
 
             <Divider />
 
-            {notifications.map((item) => (
+            {data?.map((item) => (
               <Notification
                 key={item.id}
                 data={item}

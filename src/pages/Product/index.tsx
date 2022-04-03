@@ -197,33 +197,60 @@ export const Product: React.FC = () => {
           </Grid>
         )}
 
-        <Grid item xs={6} sm={3}>
-          <DetailInfo
-            data={data?.totalQuantity || 0}
-            title="Quantidade de produtos"
-          />
-        </Grid>
+        {isAdmin ? (
+          <>
+            <Grid item xs={12} sm={3}>
+              <DetailInfo data={data?.totalQuantity || 0} title="Quantidade" />
+            </Grid>
 
-        <Grid item xs={6} sm={3}>
-          <DetailInfo
-            data={`R$ ${data?.totalPurchaseValue.toFixed(2) || 0}`}
-            title="Valor total de compra"
-          />
-        </Grid>
+            <Grid item xs={12} sm={3}>
+              <DetailInfo
+                data={`R$ ${data?.totalPurchaseValue.toFixed(2) || 0}`}
+                title="Total de compra"
+              />
+            </Grid>
 
-        <Grid item xs={6} sm={3}>
-          <DetailInfo
-            data={`R$ ${data?.totalSaleValue.toFixed(2) || 0}`}
-            title="Valor total de venda"
-          />
-        </Grid>
+            <Grid item xs={12} sm={3}>
+              <DetailInfo
+                data={`R$ ${data?.totalSaleValue.toFixed(2) || 0}`}
+                title="Total de venda"
+              />
+            </Grid>
 
-        <Grid item xs={6} sm={3}>
-          <DetailInfo
-            data={`R$ ${data?.totalProfitValue.toFixed(2) || 0}`}
-            title="Valor total de lucro"
-          />
-        </Grid>
+            <Grid item xs={12} sm={3}>
+              <DetailInfo
+                data={`R$ ${data?.totalProfitValue.toFixed(2) || 0}`}
+                title="Total de lucro"
+              />
+            </Grid>
+          </>
+        ) : (
+          <>
+            <Grid item xs={12} sm={4}>
+              <DetailInfo
+                data={data?.totalQuantity || 0}
+                value={data?.totalSaleValue}
+                title="Total"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <DetailInfo
+                data={data?.totalQuantityInStock || 0}
+                value={data?.totalSaleValueInStock}
+                title="Em estoque"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <DetailInfo
+                data={data?.totalQuantitySold || 0}
+                value={data?.totalSaleValueSold}
+                title="Vendidos"
+              />
+            </Grid>
+          </>
+        )}
 
         <Grid item xs={12}>
           <FilterData>
@@ -246,6 +273,7 @@ export const Product: React.FC = () => {
                       labelId="seller"
                       value={seller || ''}
                       onChange={({target}) => setSeller(target.value)}>
+                      <MenuItem value="">Todas</MenuItem>
                       {sellers?.map((item) => (
                         <MenuItem key={item.id} value={item.id}>
                           {item.name}
@@ -265,6 +293,7 @@ export const Product: React.FC = () => {
                     labelId="provider"
                     value={provider || ''}
                     onChange={({target}) => setProvider(target.value)}>
+                    <MenuItem value="">Todas</MenuItem>
                     {providers?.map((item) => (
                       <MenuItem key={item.id} value={item.id}>
                         {item.name}
@@ -311,38 +340,34 @@ export const Product: React.FC = () => {
                         <Tooltip title="Editar">
                           <IconButton
                             onClick={() => handleEditModal(params.row)}>
-                            <EditRounded color="primary" />
+                            <EditRounded color="action" />
                           </IconButton>
                         </Tooltip>
 
                         <Tooltip title="Deletar">
                           <IconButton
                             onClick={() => handleDelete(params.row.id)}>
-                            <DeleteRounded color="primary" />
+                            <DeleteRounded color="error" />
                           </IconButton>
                         </Tooltip>
                       </>
                     )}
 
-                    {params.row.sold ? (
-                      <Tooltip title="Retificar venda">
-                        <IconButton
-                          onClick={() =>
-                            handleSold(params.row.id, params.row.sold)
-                          }>
-                          <SellRounded color="secondary" />
-                        </IconButton>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip title="Marcar como vendido">
-                        <IconButton
-                          onClick={() =>
-                            handleSold(params.row.id, params.row.sold)
-                          }>
-                          <SellRounded color="primary" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    <Tooltip
+                      title={
+                        params.row.sold
+                          ? 'Retificar venda'
+                          : 'Marcar como vendido'
+                      }>
+                      <IconButton
+                        onClick={() =>
+                          handleSold(params.row.id, params.row.sold)
+                        }>
+                        <SellRounded
+                          color={params.row.sold ? 'success' : 'secondary'}
+                        />
+                      </IconButton>
+                    </Tooltip>
                   </>
                 ),
               },

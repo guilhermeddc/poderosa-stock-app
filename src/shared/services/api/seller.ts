@@ -2,7 +2,7 @@ import {doc, getDoc, getDocs, query, where} from 'firebase/firestore';
 import {userId} from 'shared/constants';
 import {productDB, userDB} from 'shared/services/firebase';
 
-import {IProduct} from './product';
+import {IListProduct, IProduct} from './product';
 import {providerService} from './provider';
 import {IUser} from './user';
 
@@ -46,14 +46,6 @@ const getSeller = async (id: string): Promise<ISeller> => {
   }
 };
 
-export interface IListProduct {
-  products: IProduct[];
-  totalSaleValue: number;
-  totalProfitValue: number;
-  totalQuantity: number;
-  totalPurchaseValue: number;
-}
-
 const getSellerProducts = async (
   seller: string | undefined,
 ): Promise<IListProduct> => {
@@ -75,22 +67,32 @@ const getSellerProducts = async (
     );
 
     let totalSaleValue = 0;
+    let totalSaleValueSold = 0;
     let totalProfitValue = 0;
     let totalQuantity = 0;
     let totalPurchaseValue = 0;
+    let totalQuantitySold = 0;
 
     products.forEach((product) => {
       totalSaleValue += product.saleValue;
       totalProfitValue += product.profitValue;
       totalQuantity += Number(product.quantity);
       totalPurchaseValue += product.purchaseValue;
+      if (product.sold) {
+        totalQuantitySold += Number(product.quantity);
+        totalSaleValueSold += product.saleValue;
+      }
     });
 
     return {
       products,
       totalSaleValue,
+      totalSaleValueSold,
+      totalSaleValueInStock: totalSaleValue - totalSaleValueSold,
       totalProfitValue,
       totalQuantity,
+      totalQuantitySold,
+      totalQuantityInStock: totalQuantity - totalQuantitySold,
       totalPurchaseValue,
     };
   } catch (error: any) {

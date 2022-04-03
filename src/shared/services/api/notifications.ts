@@ -46,13 +46,12 @@ const createNotification = async (
   }
 };
 
-const getNotifications = async (userId: string): Promise<INotification[]> => {
+const getNotifications = async (): Promise<INotification[]> => {
   try {
     const notifications = await getDocs(
       query(
         notificationDB,
         where('visualized', '==', false),
-        where('userId', '==', userId),
         orderBy('createdAt', 'desc'),
       ),
     );

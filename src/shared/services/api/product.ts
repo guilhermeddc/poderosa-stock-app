@@ -43,12 +43,16 @@ export interface ICreateProduct {
   travel?: string;
 }
 
-interface IListProduct {
+export interface IListProduct {
   products: IProduct[];
   totalSaleValue: number;
+  totalSaleValueSold: number;
+  totalSaleValueInStock: number;
   totalProfitValue: number;
-  totalQuantity: number;
   totalPurchaseValue: number;
+  totalQuantity: number;
+  totalQuantitySold: number;
+  totalQuantityInStock: number;
 }
 
 const getProducts = async (): Promise<IListProduct> => {
@@ -68,22 +72,32 @@ const getProducts = async (): Promise<IListProduct> => {
     );
 
     let totalSaleValue = 0;
+    let totalSaleValueSold = 0;
     let totalProfitValue = 0;
     let totalQuantity = 0;
     let totalPurchaseValue = 0;
+    let totalQuantitySold = 0;
 
     products.forEach((product) => {
       totalSaleValue += product.saleValue;
       totalProfitValue += product.profitValue;
       totalQuantity += Number(product.quantity);
       totalPurchaseValue += product.purchaseValue;
+      if (product.sold) {
+        totalQuantitySold += Number(product.quantity);
+        totalSaleValueSold += product.saleValue;
+      }
     });
 
     return {
       products,
       totalSaleValue,
+      totalSaleValueSold,
+      totalSaleValueInStock: totalSaleValue - totalSaleValueSold,
       totalProfitValue,
       totalQuantity,
+      totalQuantitySold,
+      totalQuantityInStock: totalQuantity - totalQuantitySold,
       totalPurchaseValue,
     };
   } catch (error: any) {
