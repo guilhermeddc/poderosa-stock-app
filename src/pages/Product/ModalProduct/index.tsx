@@ -83,10 +83,10 @@ export const ModalProduct: React.FC<IProps> = ({
       opened={openModal}
       onClick={handleClick}
       onClose={onClose}
-      title="Adicionar novo Produto"
+      title={initialData ? 'Editar produto' : 'Adicionar novo produto'}
       loading={loading}
-      labelCloseButton="Fechar"
-      labelSaveButton="Adicionar">
+      labelCloseButton="Cancelar"
+      labelSaveButton={initialData ? 'Salvar' : 'Adicionar'}>
       <Form
         ref={formRef}
         onSubmit={handleOnSubmit}
@@ -96,13 +96,15 @@ export const ModalProduct: React.FC<IProps> = ({
           provider: initialData?.provider.id,
         }}>
         <Grid container spacing={3}>
-          <Grid item xs={9}>
+          <Grid item xs={initialData ? 12 : 9}>
             <TextField name="description" label="Descrição" />
           </Grid>
 
-          <Grid item xs={3}>
-            <TextField name="quantity" label="Quantidade" type="number" />
-          </Grid>
+          {!initialData && (
+            <Grid item xs={3}>
+              <TextField name="quantity" label="Quantidade" type="number" />
+            </Grid>
+          )}
 
           <Grid item xs={12} sm={6}>
             <TextField name="code" label="Código" />

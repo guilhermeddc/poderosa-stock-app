@@ -40,8 +40,8 @@ export const Modal: React.FC<IProps> = ({
   return (
     <Dialog open={opened} onClose={onClose} maxWidth={maxWidth} fullWidth>
       {title && (
-        <Box pt={3} px={3}>
-          <Typography variant="h6" fontWeight={500} color="primary">
+        <Box pt={3} pb={1} px={3}>
+          <Typography variant="h5" fontWeight={500} color="primary">
             {title}
           </Typography>
         </Box>

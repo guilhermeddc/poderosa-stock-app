@@ -147,14 +147,17 @@ export const Product: React.FC = () => {
 
   const handleCloseModal = useCallback(() => {
     setProduct(undefined);
+    setProductId('');
 
     setOpenModal(false);
+    setOpenModalConfirmExclude(false);
+    setOpenModalConfirmSold(false);
   }, []);
 
   const handleClickModal = useCallback(() => {
-    setProduct(undefined);
-
     setOpenModal(false);
+
+    setProduct(undefined);
     queryClient.invalidateQueries('products');
   }, [queryClient]);
 
@@ -388,7 +391,6 @@ export const Product: React.FC = () => {
                 headerName: 'Tamanho',
                 align: 'center',
                 headerAlign: 'center',
-                minWidth: 130,
               },
               {
                 field: 'purchaseValue',
@@ -460,9 +462,7 @@ export const Product: React.FC = () => {
       <ModalConfirm
         opened={openModalConfirmExclude}
         onClick={mutationDelete.mutate}
-        onClose={() => {
-          setOpenModalConfirmExclude(false), setProductId('');
-        }}
+        onClose={handleCloseModal}
         loading={mutationDelete.isLoading}
       />
 
@@ -474,9 +474,7 @@ export const Product: React.FC = () => {
         labelSaveButton="Salvar"
         opened={openModalConfirmSold}
         onClick={() => mutationUpdate.mutate(!productSold)}
-        onClose={() => {
-          setOpenModalConfirmSold(false), setProductId('');
-        }}
+        onClose={handleCloseModal}
         loading={mutationUpdate.isLoading}
       />
     </>
