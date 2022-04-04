@@ -51,7 +51,7 @@ export const AppBar: React.FC<IProps> = ({
   const {title} = useTitle();
   const {user, isAdmin} = useAuth();
   const theme = useTheme();
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -123,9 +123,11 @@ export const AppBar: React.FC<IProps> = ({
 
               <img src={logoRet} alt="GVCentris" height={32} />
 
-              <Typography variant="h6" sx={{marginLeft: theme.spacing(2)}}>
-                {title}
-              </Typography>
+              {matches && (
+                <Typography variant="h6" sx={{marginLeft: theme.spacing(2)}}>
+                  {title}
+                </Typography>
+              )}
             </ListItem>
           </List>
         </Grid>

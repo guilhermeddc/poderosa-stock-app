@@ -26,7 +26,7 @@ export const Providers: React.FC = () => {
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
 
   const {data, isLoading} = useQuery('providers', () =>

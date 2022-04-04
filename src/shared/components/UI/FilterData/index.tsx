@@ -12,7 +12,7 @@ import {
 interface IProps {}
 
 export const FilterData: React.FC<IProps> = ({children}) => {
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   return (
     <Accordion>

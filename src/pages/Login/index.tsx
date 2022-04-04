@@ -15,7 +15,7 @@ import {useAuth} from 'shared/hooks';
 export const Login: React.FC = () => {
   const {signIn} = useAuth();
 
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   return (
     <Grid container component="main" sx={{height: '100vh'}}>

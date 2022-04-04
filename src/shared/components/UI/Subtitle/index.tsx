@@ -7,7 +7,7 @@ interface IProps {
 }
 
 export const Subtitle: React.FC<IProps> = ({subtitle}) => {
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   return (
     <Typography

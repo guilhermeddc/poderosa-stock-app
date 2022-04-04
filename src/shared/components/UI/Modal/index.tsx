@@ -35,7 +35,7 @@ export const Modal: React.FC<IProps> = ({
   labelSaveButton,
   onClick,
 }) => {
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   return (
     <Dialog open={opened} onClose={onClose} maxWidth={maxWidth} fullWidth>

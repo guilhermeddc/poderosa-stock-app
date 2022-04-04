@@ -43,7 +43,7 @@ export const Drawer: React.FC<IProps> = ({
 
   const {signOut} = useAuth();
   const theme = useTheme();
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   const filteredMenuOptions: IMenuOptions[] = useMemo(() => {
     if (menuOptions) {

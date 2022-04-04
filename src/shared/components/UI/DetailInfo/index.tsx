@@ -9,7 +9,7 @@ interface IProps {
 }
 
 export const DetailInfo: React.FC<IProps> = ({data, title, value}) => {
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   return (
     <Stack

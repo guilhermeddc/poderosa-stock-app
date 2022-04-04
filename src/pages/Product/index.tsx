@@ -52,7 +52,7 @@ export const Product: React.FC = () => {
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
   const [openModalConfirmSold, setOpenModalConfirmSold] = useState(false);
 
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
   const {isAdmin} = useAuth();
 

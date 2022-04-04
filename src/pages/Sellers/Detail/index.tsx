@@ -27,7 +27,7 @@ type IParams = {
 
 export const Detail: React.FC = () => {
   const {id} = useParams<IParams>();
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(min-width:769px)');
 
   const {data, isLoading} = useQuery(
     ['seller', id],
