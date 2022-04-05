@@ -17,8 +17,7 @@ import {
   LinearDeterminate,
   Subtitle,
 } from 'shared/components';
-import {cpfMask, phoneMask} from 'shared/helpers/masks';
-import {renderNumber} from 'shared/helpers/renderNumber';
+import {cpfMask, phoneMask, moneyMask} from 'shared/helpers/masks';
 import {sellerService} from 'shared/services/api/seller';
 
 type IParams = {
@@ -121,19 +120,19 @@ export const Detail: React.FC = () => {
               field: 'purchaseValue',
               headerName: 'Valor de compra',
               minWidth: 130,
-              renderCell: (params) => renderNumber(params.row.purchaseValue),
+              renderCell: (params) => moneyMask(params.row.purchaseValue),
             },
             {
               field: 'saleValue',
               headerName: 'Valor de venda',
               minWidth: 130,
-              renderCell: (params) => renderNumber(params.row.saleValue),
+              renderCell: (params) => moneyMask(params.row.saleValue),
             },
             {
               field: 'profitValue',
               headerName: 'Lucro',
               minWidth: 130,
-              renderCell: (params) => renderNumber(params.row.profitValue),
+              renderCell: (params) => moneyMask(params.row.profitValue),
             },
             {
               field: 'sold',

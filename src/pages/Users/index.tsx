@@ -2,7 +2,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
 
 import {EditRounded, DeleteRounded} from '@mui/icons-material';
-import {Grid, Tooltip, IconButton, Avatar} from '@mui/material';
+import {Grid, Tooltip, IconButton, Avatar, Stack} from '@mui/material';
 import {
   Title,
   FilterData,
@@ -10,6 +10,7 @@ import {
   Subtitle,
   DataGrid,
   ModalConfirm,
+  Button,
 } from 'shared/components';
 import {cpfMask, phoneMask} from 'shared/helpers/masks';
 import {userType} from 'shared/helpers/userType';
@@ -88,11 +89,25 @@ const Users: React.FC = () => {
 
         <Grid item xs={12}>
           <FilterData>
-            <InputSearch
-              placeholder="Pesquisar por nome ou CPF..."
-              value={filter}
-              onChange={({target}) => setFilter(target.value)}
-            />
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <InputSearch
+                  placeholder="Pesquisar por nome ou CPF..."
+                  value={filter}
+                  onChange={({target}) => setFilter(target.value)}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button
+                    label="Limpar filtros"
+                    minWidth={180}
+                    onClick={() => setFilter('')}
+                  />
+                </Stack>
+              </Grid>
+            </Grid>
           </FilterData>
         </Grid>
 

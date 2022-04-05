@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useQuery, useQueryClient, useMutation} from 'react-query';
 import {Link as RouteLink} from 'react-router-dom';
 
@@ -31,8 +31,8 @@ import {
   Subtitle,
   Title,
 } from 'shared/components';
-import {renderNumber} from 'shared/helpers/renderNumber';
-import {useAuth} from 'shared/hooks';
+import {moneyMask} from 'shared/helpers/masks';
+import {useAuth, useTitle} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
 import {IProduct, productService} from 'shared/services/api/product';
 import {IProvider, providerService} from 'shared/services/api/provider';
@@ -55,6 +55,11 @@ export const Product: React.FC = () => {
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
   const {isAdmin} = useAuth();
+  const {setTitle} = useTitle();
+
+  useEffect(() => {
+    setTitle('Produtos');
+  }, [setTitle]);
 
   const {data, isLoading} = useQuery('products', () =>
     productService.getProducts(),
@@ -399,7 +404,7 @@ export const Product: React.FC = () => {
                 align: 'center',
                 headerAlign: 'center',
                 minWidth: 130,
-                renderCell: (params) => renderNumber(params.row.purchaseValue),
+                renderCell: (params) => moneyMask(params.row.purchaseValue),
               },
               {
                 field: 'saleValue',
@@ -407,7 +412,7 @@ export const Product: React.FC = () => {
                 minWidth: 130,
                 align: 'center',
                 headerAlign: 'center',
-                renderCell: (params) => renderNumber(params.row.saleValue),
+                renderCell: (params) => moneyMask(params.row.saleValue),
               },
               {
                 field: 'profitValue',
@@ -416,7 +421,7 @@ export const Product: React.FC = () => {
                 minWidth: 130,
                 align: 'center',
                 headerAlign: 'center',
-                renderCell: (params) => renderNumber(params.row.profitValue),
+                renderCell: (params) => moneyMask(params.row.profitValue),
               },
               {
                 field: 'sold',

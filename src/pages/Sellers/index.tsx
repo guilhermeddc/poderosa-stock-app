@@ -1,10 +1,11 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useQuery} from 'react-query';
 import {useNavigate} from 'react-router-dom';
 
 import {VisibilityRounded} from '@mui/icons-material';
-import {Grid, IconButton, Tooltip} from '@mui/material';
+import {Grid, IconButton, Stack, Tooltip} from '@mui/material';
 import {
+  Button,
   DataGrid,
   FilterData,
   InputSearch,
@@ -13,12 +14,18 @@ import {
   Title,
 } from 'shared/components';
 import {cpfMask, phoneMask} from 'shared/helpers/masks';
+import {useTitle} from 'shared/hooks';
 import {sellerService} from 'shared/services/api/seller';
 
 export const Sellers: React.FC = () => {
   const [filter, setFilter] = useState('');
 
   const navigate = useNavigate();
+  const {setTitle} = useTitle();
+
+  useEffect(() => {
+    setTitle('Vendedores');
+  }, [setTitle]);
 
   const {data, isLoading} = useQuery('sellers', () =>
     sellerService.getSellers(),
@@ -48,11 +55,25 @@ export const Sellers: React.FC = () => {
 
         <Grid item xs={12}>
           <FilterData>
-            <InputSearch
-              placeholder="Pesquisar por nome ou CPF..."
-              value={filter}
-              onChange={({target}) => setFilter(target.value)}
-            />
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <InputSearch
+                  placeholder="Pesquisar por nome ou CPF..."
+                  value={filter}
+                  onChange={({target}) => setFilter(target.value)}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button
+                    label="Limpar filtros"
+                    minWidth={180}
+                    onClick={() => setFilter('')}
+                  />
+                </Stack>
+              </Grid>
+            </Grid>
           </FilterData>
         </Grid>
 

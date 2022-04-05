@@ -24,5 +24,7 @@ export const userDB = collection(db, 'users');
 export const productDB = collection(db, 'products');
 export const providerDB = collection(db, 'providers');
 export const adminDB = collection(db, 'admins');
+export const purchaseDB = collection(db, 'purchases');
+export const purchaseTypeDB = collection(db, 'purchaseType');
 
 export default app;

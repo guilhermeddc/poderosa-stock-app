@@ -17,12 +17,12 @@ export const adminMenu = [
     icon: 'shopping_bag',
     path: '/produtos',
   },
-  // {
-  //   id: 'purchases',
-  //   label: 'Compras',
-  //   icon: 'attach_money',
-  //   path: '/compras',
-  // },
+  {
+    id: 'purchases',
+    label: 'Compras',
+    icon: 'attach_money',
+    path: '/compras',
+  },
   // {
   //   id: 'sell',
   //   label: 'Vendas',

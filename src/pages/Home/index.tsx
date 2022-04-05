@@ -4,8 +4,8 @@ import {Grid, Typography} from '@mui/material';
 import {useAuth, useTitle} from 'shared/hooks';
 
 const Home: React.FC = () => {
-  const {setTitle} = useTitle();
   const {user} = useAuth();
+  const {setTitle} = useTitle();
 
   useEffect(() => {
     setTitle('Página inicial');

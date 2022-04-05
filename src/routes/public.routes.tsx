@@ -1,7 +1,7 @@
 import React, {lazy, Suspense, useEffect} from 'react';
 import {Routes, Route, useLocation, useNavigate} from 'react-router-dom';
 
-import {Box, CircularProgress} from '@mui/material';
+import {LinearDeterminate} from 'shared/components';
 
 const Login = lazy(() => import('pages/Login'));
 
@@ -14,17 +14,7 @@ export const PublicRoutes: React.FC = () => {
   }, [location.pathname, navigate]);
 
   return (
-    <Suspense
-      fallback={
-        <Box
-          display="flex"
-          width="100%"
-          height="100%"
-          justifyContent="center"
-          alignContent="center">
-          <CircularProgress />
-        </Box>
-      }>
+    <Suspense fallback={<LinearDeterminate />}>
       <Routes>
         <Route path="/" element={<Login />} />
       </Routes>

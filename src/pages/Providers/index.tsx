@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useQueryClient, useQuery, useMutation} from 'react-query';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
@@ -14,6 +14,7 @@ import {
   Title,
 } from 'shared/components';
 import {cnpjMask, phoneMask} from 'shared/helpers/masks';
+import {useTitle} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
 import {IProvider, providerService} from 'shared/services/api/provider';
 
@@ -28,6 +29,11 @@ export const Providers: React.FC = () => {
 
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
+  const {setTitle} = useTitle();
+
+  useEffect(() => {
+    setTitle('Fornecedores');
+  }, [setTitle]);
 
   const {data, isLoading} = useQuery('providers', () =>
     providerService.getProviders(),
@@ -112,11 +118,25 @@ export const Providers: React.FC = () => {
 
         <Grid item xs={12}>
           <FilterData>
-            <InputSearch
-              placeholder="Pesquisar por nome ou CNPJ..."
-              value={filter}
-              onChange={({target}) => setFilter(target.value)}
-            />
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <InputSearch
+                  placeholder="Pesquisar por nome ou CNPJ..."
+                  value={filter}
+                  onChange={({target}) => setFilter(target.value)}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button
+                    label="Limpar filtros"
+                    minWidth={180}
+                    onClick={() => setFilter('')}
+                  />
+                </Stack>
+              </Grid>
+            </Grid>
           </FilterData>
         </Grid>
 
