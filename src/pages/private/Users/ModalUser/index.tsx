@@ -1,6 +1,6 @@
 import React, {useCallback, useRef} from 'react';
 
-import {Grid, MenuItem} from '@mui/material';
+import {Divider, Grid, MenuItem} from '@mui/material';
 import {FormHandles} from '@unform/core';
 import {Form, Modal, NumberFormat, Select, TextField} from 'shared/components';
 import {userId} from 'shared/constants';
@@ -33,6 +33,11 @@ export const ModalUser: React.FC<IProps> = ({
           cpf: Yup.string().required(),
           phone: Yup.string().required(),
           email: Yup.string().required().email(),
+          city: Yup.string().required(),
+          uf: Yup.string().required(),
+          publicPlace: Yup.string().required(),
+          number: Yup.string().required(),
+          complement: Yup.string().notRequired(),
         });
 
         await schema.validate(data, {
@@ -96,6 +101,34 @@ export const ModalUser: React.FC<IProps> = ({
               prefix=""
               format="(##) #####-####"
             />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
+          </Grid>
+
+          <Grid item xs={8}>
+            <TextField name="city" label="Cidade" />
+          </Grid>
+
+          <Grid item xs={4}>
+            <TextField name="uf" label="UF" />
+          </Grid>
+
+          <Grid item xs={8}>
+            <TextField name="publicPlace" label="Logradouro" />
+          </Grid>
+
+          <Grid item xs={4}>
+            <TextField name="number" label="Número" />
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField name="complement" label="Complemento" />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider />
           </Grid>
 
           <Grid item xs={12}>

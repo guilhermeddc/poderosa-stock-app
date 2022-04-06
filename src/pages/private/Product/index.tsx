@@ -2,24 +2,20 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useQuery, useQueryClient, useMutation} from 'react-query';
 import {Link as RouteLink} from 'react-router-dom';
 
-import {
-  AddRounded,
-  DeleteRounded,
-  EditRounded,
-  SellRounded,
-} from '@mui/icons-material';
+import {AddRounded, SellRounded} from '@mui/icons-material';
 import {
   Grid,
   MenuItem,
   Stack,
-  useMediaQuery,
   Tooltip,
   IconButton,
   Select,
   FormControl,
   InputLabel,
   Link,
+  useMediaQuery,
 } from '@mui/material';
+import {GridSelectionModel} from '@mui/x-data-grid';
 import {
   Button,
   DataGrid,
@@ -27,6 +23,7 @@ import {
   FilterData,
   InputSearch,
   LinearDeterminate,
+  Modal,
   ModalConfirm,
   Subtitle,
   Title,
@@ -35,21 +32,18 @@ import {moneyMask} from 'shared/helpers/masks';
 import {useAuth, useTitle} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
 import {IProduct, productService} from 'shared/services/api/product';
-import {IProvider, providerService} from 'shared/services/api/provider';
+import {providerService} from 'shared/services/api/provider';
 import {sellerService} from 'shared/services/api/seller';
-import {IUser} from 'shared/services/api/user';
-
-import {ModalProduct} from './ModalProduct';
 
 export const Product: React.FC = () => {
-  const [product, setProduct] = useState<IProduct | undefined>();
   const [seller, setSeller] = useState('');
+  const [sellerTransfer, setSellerTransfer] = useState('');
   const [provider, setProvider] = useState('');
-  const [filter, setFilter] = useState('');
   const [openModal, setOpenModal] = useState(false);
+  const [filter, setFilter] = useState('');
   const [productId, setProductId] = useState('');
+  const [productIds, setProductIds] = useState<GridSelectionModel>([]);
   const [productSold, setProductSold] = useState(false);
-  const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
   const [openModalConfirmSold, setOpenModalConfirmSold] = useState(false);
 
   const matches = useMediaQuery('(min-width:769px)');
@@ -71,23 +65,6 @@ export const Product: React.FC = () => {
     providerService.getProviders(),
   );
 
-  const mutationDelete = useMutation(
-    () => productService.deleteProduct(productId),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('products');
-        setProductId('');
-        setOpenModalConfirmExclude(false);
-        feedback('Registro excluído com sucesso', 'success');
-      },
-      onError: () => {
-        setProductId('');
-        setOpenModalConfirmExclude(false);
-        feedback('Erro ao excluir registro', 'error');
-      },
-    },
-  );
-
   const mutationUpdate = useMutation(
     (sold: boolean) => productService.changeSoldProduct(productId, sold),
     {
@@ -105,6 +82,21 @@ export const Product: React.FC = () => {
     },
   );
 
+  const mutationTransfer = useMutation(
+    (sellerId: string) => productService.transferProducts(productIds, sellerId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('products');
+        setOpenModal(false);
+        feedback('Registro atualizado com sucesso', 'success');
+      },
+      onError: () => {
+        setOpenModal(false);
+        feedback('Erro ao atualizar registro', 'error');
+      },
+    },
+  );
+
   const filteredData = useMemo(() => {
     if (data?.products) {
       const itemFiltered = (item: IProduct) =>
@@ -112,12 +104,27 @@ export const Product: React.FC = () => {
         item.size.toLowerCase().includes(filter.toLowerCase()) ||
         item.code.toLowerCase().includes(filter.toLowerCase());
 
-      if (seller && provider) {
+      if (seller && seller !== 'none' && provider) {
         return data?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === seller &&
             item.provider.id === provider,
+        );
+      }
+
+      if (seller === 'none' && provider) {
+        return data?.products.filter(
+          (item) =>
+            itemFiltered(item) &&
+            item.seller?.id === '' &&
+            item.provider.id === provider,
+        );
+      }
+
+      if (seller === 'none') {
+        return data?.products.filter(
+          (item) => itemFiltered(item) && item.seller?.id === '',
         );
       }
 
@@ -144,32 +151,11 @@ export const Product: React.FC = () => {
     setProvider('');
   }, []);
 
-  const handleEditModal = useCallback((row: IProduct) => {
-    setProduct(row);
-
-    setOpenModal(true);
-  }, []);
-
   const handleCloseModal = useCallback(() => {
-    setProduct(undefined);
     setProductId('');
 
     setOpenModal(false);
-    setOpenModalConfirmExclude(false);
     setOpenModalConfirmSold(false);
-  }, []);
-
-  const handleClickModal = useCallback(() => {
-    setOpenModal(false);
-
-    setProduct(undefined);
-    queryClient.invalidateQueries('products');
-  }, [queryClient]);
-
-  const handleDelete = useCallback((id: string) => {
-    setOpenModalConfirmExclude(true);
-
-    setProductId(id);
   }, []);
 
   const handleSold = useCallback((id: string, sold: boolean) => {
@@ -186,24 +172,9 @@ export const Product: React.FC = () => {
   return (
     <>
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={isAdmin ? 6 : 12}>
+        <Grid item xs={12}>
           <Title title="Gestão de produtos" />
         </Grid>
-
-        {isAdmin && (
-          <Grid item xs={12} sm={6}>
-            <Stack direction="row" justifyContent="flex-end">
-              <Button
-                fullWidth={!matches}
-                label="Adicionar"
-                startIcon={<AddRounded />}
-                variant="outlined"
-                onClick={() => setOpenModal(true)}
-                disabled={isLoading}
-              />
-            </Stack>
-          </Grid>
-        )}
 
         {isAdmin ? (
           <>
@@ -282,6 +253,7 @@ export const Product: React.FC = () => {
                       value={seller || ''}
                       onChange={({target}) => setSeller(target.value)}>
                       <MenuItem value="">Todas</MenuItem>
+                      <MenuItem value="none">Não atribuídos</MenuItem>
                       {sellers?.map((item) => (
                         <MenuItem key={item.id} value={item.id}>
                           {item.name}
@@ -324,9 +296,24 @@ export const Product: React.FC = () => {
           </FilterData>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <Subtitle subtitle="Produtos" />
         </Grid>
+
+        {isAdmin && (
+          <Grid item xs={12} sm={6}>
+            <Stack direction="row" justifyContent="flex-end">
+              <Button
+                fullWidth={!matches}
+                variant="outlined"
+                label="Transferir produtos"
+                startIcon={<AddRounded />}
+                onClick={() => setOpenModal(true)}
+                disabled={isLoading || productIds.length === 0}
+              />
+            </Stack>
+          </Grid>
+        )}
 
         <Grid item xs={12}>
           <DataGrid
@@ -342,41 +329,21 @@ export const Product: React.FC = () => {
                 disableExport: true,
                 sortable: false,
                 renderCell: (params) => (
-                  <>
-                    {isAdmin && (
-                      <>
-                        <Tooltip title="Editar">
-                          <IconButton
-                            onClick={() => handleEditModal(params.row)}>
-                            <EditRounded color="action" />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Deletar">
-                          <IconButton
-                            onClick={() => handleDelete(params.row.id)}>
-                            <DeleteRounded color="error" />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
-
-                    <Tooltip
-                      title={
-                        params.row.sold
-                          ? 'Retificar venda'
-                          : 'Marcar como vendido'
+                  <Tooltip
+                    title={
+                      params.row.sold
+                        ? 'Retificar venda'
+                        : 'Marcar como vendido'
+                    }>
+                    <IconButton
+                      onClick={() =>
+                        handleSold(params.row.id, params.row.sold)
                       }>
-                      <IconButton
-                        onClick={() =>
-                          handleSold(params.row.id, params.row.sold)
-                        }>
-                        <SellRounded
-                          color={params.row.sold ? 'success' : 'secondary'}
-                        />
-                      </IconButton>
-                    </Tooltip>
-                  </>
+                      <SellRounded
+                        color={params.row.sold ? 'success' : 'secondary'}
+                      />
+                    </IconButton>
+                  </Tooltip>
                 ),
               },
               {
@@ -451,25 +418,13 @@ export const Product: React.FC = () => {
               },
             ]}
             rows={filteredData}
+            onSelectionModelChange={(ids) => {
+              setProductIds(ids);
+            }}
+            checkboxSelection
           />
         </Grid>
       </Grid>
-
-      <ModalProduct
-        openModal={openModal}
-        onClick={handleClickModal}
-        onClose={handleCloseModal}
-        initialData={product}
-        sellers={sellers as IUser[]}
-        providers={providers as IProvider[]}
-      />
-
-      <ModalConfirm
-        opened={openModalConfirmExclude}
-        onClick={mutationDelete.mutate}
-        onClose={handleCloseModal}
-        loading={mutationDelete.isLoading}
-      />
 
       <ModalConfirm
         title={productSold ? 'Retificar venda' : 'Vender produto'}
@@ -482,6 +437,32 @@ export const Product: React.FC = () => {
         onClose={handleCloseModal}
         loading={mutationUpdate.isLoading}
       />
+
+      <Modal
+        opened={openModal}
+        onClose={handleCloseModal}
+        onClick={() => mutationTransfer.mutate(sellerTransfer)}
+        labelSaveButton="Transferir"
+        labelCloseButton="Cancelar"
+        title={`Transferir ${productIds.length} ${
+          productIds.length === 1 ? 'produto' : 'produtos'
+        } para`}>
+        <FormControl variant="outlined" fullWidth>
+          <InputLabel id="seller">Vendedor(a)s</InputLabel>
+          <Select
+            label="Vendedor(a)s"
+            id="seller"
+            labelId="seller"
+            value={sellerTransfer || ''}
+            onChange={({target}) => setSellerTransfer(target.value)}>
+            {sellers?.map((item) => (
+              <MenuItem key={item.id} value={item.id}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Modal>
     </>
   );
 };

@@ -185,6 +185,7 @@ const getPurchaseProducts = async (purchase: string): Promise<IListProduct> => {
     const productSnapshot = await getDocs(
       query(productDB, where('purchase', '==', purchase)),
     );
+
     const products = await Promise.all(
       productSnapshot.docs.map(async (data) => {
         return {

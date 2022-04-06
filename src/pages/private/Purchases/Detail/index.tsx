@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
-import {useNavigate, Link as RouteLink} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
 import {
@@ -11,7 +11,6 @@ import {
   Paper,
   Stack,
   useMediaQuery,
-  Link,
   Tooltip,
   IconButton,
 } from '@mui/material';
@@ -21,6 +20,7 @@ import {
   DataGrid,
   DetailInfo,
   Form,
+  LinearDeterminate,
   ModalConfirm,
   Select,
   Subtitle,
@@ -37,31 +37,42 @@ import * as Yup from 'yup';
 
 import {ModalProduct} from './ModalProduct';
 
-const PurchaseNew: React.FC = () => {
+const PurchaseDetail: React.FC = () => {
+  const [idPurchase, setIdPurchase] = useState('');
   const [product, setProduct] = useState<IProduct | undefined>();
   const [productId, setProductId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [idPurchase, setIdPurchase] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
   const formRef = useRef<FormHandles>(null);
+  const {id} = useParams<{id: string}>();
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
   const {setTitle} = useTitle();
   const navigate = useNavigate();
 
   useEffect(() => {
-    purchaseService.createPurchase().then((response) => {
-      setIdPurchase(response);
-    });
-  }, []);
+    if (id) setIdPurchase(id);
+    else
+      purchaseService.createPurchase().then((response) => {
+        setIdPurchase(response);
+      });
+  }, [id]);
+
+  const {data: purchase, isLoading} = useQuery(
+    'purchase',
+    () => purchaseService.getPurchase(String(id)),
+    {
+      enabled: !!id,
+    },
+  );
 
   const {data: purchaseTypes} = useQuery('purchaseTypes', () =>
     purchaseService.getPurchaseTypes(),
   );
 
-  const {data: productData} = useQuery(
+  const {data: productData, isLoading: isLoadingPD} = useQuery(
     'purchaseProducts',
     () => purchaseService.getPurchaseProducts(idPurchase),
     {
@@ -92,8 +103,8 @@ const PurchaseNew: React.FC = () => {
   );
 
   useEffect(() => {
-    setTitle('Nova compra');
-  }, [setTitle]);
+    setTitle(!id ? 'Nova compra' : 'Visualizar | Editar compra');
+  }, [id, setTitle]);
 
   const handleClickModal = useCallback(async () => {
     setOpenModal(false);
@@ -168,16 +179,23 @@ const PurchaseNew: React.FC = () => {
     ],
   );
 
+  if (isLoading || isLoadingPD) {
+    return <LinearDeterminate />;
+  }
+
   return (
     <>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
-          <Title title="Nova compra" />
+          <Title title={!id ? 'Nova compra' : 'Visualizar | Editar compra'} />
         </Grid>
 
         <Grid item xs={12}>
           <Box component={Paper} variant="outlined" p={3}>
-            <Form ref={formRef} onSubmit={handleOnSubmit}>
+            <Form
+              ref={formRef}
+              onSubmit={handleOnSubmit}
+              initialData={purchase}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={9}>
                   <TextField name="name" label="Nome" fullWidth />
@@ -232,13 +250,15 @@ const PurchaseNew: React.FC = () => {
 
                 <Grid item xs={12}>
                   <Stack direction="row" justifyContent="flex-end" spacing={3}>
-                    <Button
-                      label="Cancelar compra"
-                      variant="outlined"
-                      onClick={handleCancelPurchase}
-                      disabled={loading}
-                      minWidth={180}
-                    />
+                    {!id && (
+                      <Button
+                        label="Cancelar compra"
+                        variant="outlined"
+                        onClick={handleCancelPurchase}
+                        disabled={loading}
+                        minWidth={180}
+                      />
+                    )}
 
                     <Button
                       label="Salvar compra"
@@ -261,7 +281,7 @@ const PurchaseNew: React.FC = () => {
           <Stack direction="row" justifyContent="flex-end">
             <Button
               fullWidth={!matches}
-              label="Adicionar"
+              label="Adicionar novo"
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => setOpenModal(true)}
@@ -349,18 +369,6 @@ const PurchaseNew: React.FC = () => {
                 renderCell: (params) => (params.row.sold ? 'Sim' : 'Não'),
               },
               {
-                field: 'seller',
-                headerName: 'Vendedor',
-                renderCell: (params) => (
-                  <Link
-                    component={RouteLink}
-                    to={`/vendedores/${params.row.seller?.id}`}>
-                    {params.row.seller?.name}
-                  </Link>
-                ),
-                minWidth: 180,
-              },
-              {
                 field: 'provider',
                 headerName: 'Fábrica',
                 renderCell: (params) => params.row.provider.name,
@@ -390,4 +398,4 @@ const PurchaseNew: React.FC = () => {
   );
 };
 
-export default PurchaseNew;
+export default PurchaseDetail;

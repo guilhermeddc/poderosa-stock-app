@@ -101,7 +101,7 @@ export const Sellers: React.FC = () => {
                         onClick={() =>
                           navigate(`/vendedores/${params.row.id}`)
                         }>
-                        <VisibilityRounded color="primary" />
+                        <VisibilityRounded />
                       </IconButton>
                     </Tooltip>
                   </>

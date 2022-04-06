@@ -13,16 +13,15 @@ import {
   Subtitle,
   Title,
 } from 'shared/components';
-import {cnpjMask, phoneMask} from 'shared/helpers/masks';
 import {useTitle} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
-import {IProvider, providerService} from 'shared/services/api/provider';
+import {shoppingService, IShopping} from 'shared/services/api/shopping';
 
-import {ModalProvider} from './ModalProvider';
+import {ModalShopping} from './ModalShopping';
 
-export const Providers: React.FC = () => {
+export const Shoppings: React.FC = () => {
   const [filter, setFilter] = useState('');
-  const [provider, setProvider] = useState<IProvider | undefined>();
+  const [shopping, setShopping] = useState<IShopping | undefined>();
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
@@ -32,18 +31,18 @@ export const Providers: React.FC = () => {
   const {setTitle} = useTitle();
 
   useEffect(() => {
-    setTitle('Fornecedores');
+    setTitle('Shoppings');
   }, [setTitle]);
 
-  const {data, isLoading} = useQuery('providers', () =>
-    providerService.getProviders(),
+  const {data, isLoading} = useQuery('shoppings', () =>
+    shoppingService.getShoppings(),
   );
 
   const mutation = useMutation(
-    () => providerService.deleteProvider(idDeleted),
+    () => shoppingService.deleteShopping(idDeleted),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('providers');
+        queryClient.invalidateQueries('shoppings');
         setIdDeleted('');
         setOpenModalConfirmExclude(false);
         feedback('Registro excluído com sucesso', 'success');
@@ -56,23 +55,23 @@ export const Providers: React.FC = () => {
     },
   );
 
-  const handleEditModal = useCallback((row: IProvider) => {
-    setProvider(row);
+  const handleEditModal = useCallback((row: IShopping) => {
+    setShopping(row);
 
     setOpenModal(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
-    setProvider(undefined);
+    setShopping(undefined);
 
     setOpenModal(false);
   }, []);
 
   const handleClickModal = useCallback(() => {
-    setProvider(undefined);
+    setShopping(undefined);
 
     setOpenModal(false);
-    queryClient.invalidateQueries('providers');
+    queryClient.invalidateQueries('shoppings');
   }, [queryClient]);
 
   const handleDelete = useCallback((id: string) => {
@@ -83,10 +82,8 @@ export const Providers: React.FC = () => {
 
   const filteredData = useMemo(() => {
     if (data) {
-      return data.filter(
-        (item) =>
-          item.name.toLowerCase().includes(filter.toLowerCase()) ||
-          item.cnpj.toLowerCase().includes(filter.toLowerCase()),
+      return data.filter((item) =>
+        item.name.toLowerCase().includes(filter.toLowerCase()),
       );
     }
     return [];
@@ -100,14 +97,14 @@ export const Providers: React.FC = () => {
     <>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
-          <Title title="Gestão de fornecedores" />
+          <Title title="Gestão de shoppings" />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <Stack direction="row" justifyContent="flex-end">
             <Button
               fullWidth={!matches}
-              label="Adicionar"
+              label="Adicionar novo"
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => setOpenModal(true)}
@@ -121,7 +118,7 @@ export const Providers: React.FC = () => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <InputSearch
-                  placeholder="Pesquisar por nome ou CNPJ..."
+                  placeholder="Pesquisar por nome..."
                   value={filter}
                   onChange={({target}) => setFilter(target.value)}
                 />
@@ -141,7 +138,7 @@ export const Providers: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Subtitle subtitle="Fornecedores" />
+          <Subtitle subtitle="Shoppings" />
         </Grid>
 
         <Grid item xs={12}>
@@ -157,13 +154,13 @@ export const Providers: React.FC = () => {
                   <>
                     <Tooltip title="Editar">
                       <IconButton onClick={() => handleEditModal(params.row)}>
-                        <EditRounded color="primary" />
+                        <EditRounded color="action" />
                       </IconButton>
                     </Tooltip>
 
                     <Tooltip title="Deletar">
                       <IconButton onClick={() => handleDelete(params.row.id)}>
-                        <DeleteRounded color="primary" />
+                        <DeleteRounded color="error" />
                       </IconButton>
                     </Tooltip>
                   </>
@@ -175,21 +172,14 @@ export const Providers: React.FC = () => {
                 minWidth: 250,
               },
               {
-                field: 'email',
-                headerName: 'E-mail',
+                field: 'city',
+                headerName: 'Cidade',
                 minWidth: 200,
               },
               {
-                field: 'cnpj',
-                headerName: 'CNPJ',
-                minWidth: 200,
-                renderCell: (params) => cnpjMask(params.row.cnpj),
-              },
-              {
-                field: 'phone',
-                headerName: 'Telefone',
-                minWidth: 130,
-                renderCell: (params) => phoneMask(params.row.phone),
+                field: 'uf',
+                headerName: 'UF',
+                minWidth: 100,
               },
             ]}
             rows={filteredData}
@@ -197,11 +187,11 @@ export const Providers: React.FC = () => {
         </Grid>
       </Grid>
 
-      <ModalProvider
+      <ModalShopping
         openModal={openModal}
         onClick={handleClickModal}
         onClose={handleCloseModal}
-        initialData={provider}
+        initialData={shopping}
       />
 
       <ModalConfirm
@@ -216,4 +206,4 @@ export const Providers: React.FC = () => {
   );
 };
 
-export default Providers;
+export default Shoppings;

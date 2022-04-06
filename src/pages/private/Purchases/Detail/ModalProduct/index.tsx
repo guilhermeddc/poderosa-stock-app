@@ -1,12 +1,12 @@
 import React, {useCallback, useRef, useState} from 'react';
+import {useQuery} from 'react-query';
 
 import {Divider, Grid, MenuItem, Typography} from '@mui/material';
 import {FormHandles} from '@unform/core';
 import {Form, Modal, NumberFormat, Select, TextField} from 'shared/components';
 import getValidationErrors from 'shared/helpers/getValidationErrors';
 import {IProduct, productService} from 'shared/services/api/product';
-import {IProvider} from 'shared/services/api/provider';
-import {ISeller} from 'shared/services/api/seller';
+import {providerService} from 'shared/services/api/provider';
 import * as Yup from 'yup';
 
 interface IProps {
@@ -14,8 +14,7 @@ interface IProps {
   onClick(): void;
   onClose(): void;
   initialData?: IProduct;
-  providers: IProvider[];
-  sellers: ISeller[];
+  idPurchase?: string;
 }
 
 export const ModalProduct: React.FC<IProps> = ({
@@ -23,12 +22,15 @@ export const ModalProduct: React.FC<IProps> = ({
   onClick,
   onClose,
   initialData,
-  providers,
-  sellers,
+  idPurchase,
 }) => {
   const [loading, setLoading] = useState(false);
 
   const formRef = useRef<FormHandles>(null);
+
+  const {data: providers} = useQuery('providers', () =>
+    providerService.getProviders(),
+  );
 
   const handleOnSubmit = useCallback(
     async (data) => {
@@ -36,15 +38,25 @@ export const ModalProduct: React.FC<IProps> = ({
       try {
         formRef.current?.setErrors({});
 
-        const schema = Yup.object().shape({
-          code: Yup.string().required(),
-          description: Yup.string().required(),
-          quantity: Yup.number().required().min(1),
-          size: Yup.string().required(),
-          purchaseValue: Yup.number().required(),
-          saleValue: Yup.number().required(),
-          provider: Yup.string().required(),
-        });
+        const initialSchema = {
+          code: Yup.string().required('Código é obrigatório'),
+          description: Yup.string().required('Descrição é obrigatório'),
+          size: Yup.string().required('Tamanho é obrigatório'),
+          purchaseValue: Yup.number().required('Valor de compra é obrigatório'),
+          saleValue: Yup.number().required('Valor de venda é obrigatório'),
+          provider: Yup.string().required('Fornecedor é obrigatório'),
+        };
+
+        let schema;
+
+        if (initialData) {
+          schema = Yup.object().shape(initialSchema);
+        } else {
+          schema = Yup.object().shape({
+            ...initialSchema,
+            quantity: Yup.number().required('Quantidade é obrigatório').min(1),
+          });
+        }
 
         await schema.validate(data, {
           abortEarly: false,
@@ -55,6 +67,7 @@ export const ModalProduct: React.FC<IProps> = ({
           profitValue: Number((data.saleValue - data.purchaseValue).toFixed(2)),
           saleValue: Number(data.saleValue).toFixed(2),
           purchaseValue: Number(data.purchaseValue).toFixed(2),
+          purchase: idPurchase,
         };
 
         initialData
@@ -71,7 +84,7 @@ export const ModalProduct: React.FC<IProps> = ({
         setLoading(false);
       }
     },
-    [initialData, onClick],
+    [initialData, onClick, idPurchase],
   );
 
   const handleClick = useCallback(() => {
@@ -132,17 +145,7 @@ export const ModalProduct: React.FC<IProps> = ({
 
           <Grid item xs={12}>
             <Select name="provider" label="Fábrica">
-              {providers.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Select name="seller" label="Vendedor(a)">
-              {sellers.map((item) => (
+              {providers?.map((item) => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
                 </MenuItem>

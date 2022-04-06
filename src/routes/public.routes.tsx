@@ -3,7 +3,7 @@ import {Routes, Route, useLocation, useNavigate} from 'react-router-dom';
 
 import {LinearDeterminate} from 'shared/components';
 
-const Login = lazy(() => import('pages/Login'));
+const Login = lazy(() => import('pages/public/Login'));
 
 export const PublicRoutes: React.FC = () => {
   const location = useLocation();

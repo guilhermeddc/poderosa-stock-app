@@ -1,66 +1,78 @@
-import React, {useCallback, useMemo, useState} from 'react';
-import {useMutation, useQuery, useQueryClient} from 'react-query';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useQueryClient, useQuery, useMutation} from 'react-query';
 
-import {EditRounded, DeleteRounded} from '@mui/icons-material';
-import {Grid, Tooltip, IconButton, Avatar, Stack} from '@mui/material';
+import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
+import {Grid, IconButton, Stack, Tooltip, useMediaQuery} from '@mui/material';
 import {
-  Title,
+  Button,
+  DataGrid,
   FilterData,
   InputSearch,
-  Subtitle,
-  DataGrid,
+  LinearDeterminate,
   ModalConfirm,
-  Button,
+  Subtitle,
+  Title,
 } from 'shared/components';
-import {cpfMask, phoneMask} from 'shared/helpers/masks';
-import {userType} from 'shared/helpers/userType';
+import {phoneMask} from 'shared/helpers/masks';
+import {useTitle} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
-import {IUser, userService} from 'shared/services/api/user';
+import {IProvider, providerService} from 'shared/services/api/provider';
 
-import {ModalUser} from './components/ModalUser';
+import {ModalProvider} from './ModalProvider';
 
-const Users: React.FC = () => {
+export const Providers: React.FC = () => {
   const [filter, setFilter] = useState('');
-  const [user, setUser] = useState<IUser | undefined>();
+  const [provider, setProvider] = useState<IProvider | undefined>();
   const [openModal, setOpenModal] = useState(false);
   const [idDeleted, setIdDeleted] = useState('');
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
+  const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
+  const {setTitle} = useTitle();
 
-  const {data} = useQuery('users', () => userService.getUsers());
+  useEffect(() => {
+    setTitle('Fornecedores');
+  }, [setTitle]);
 
-  const mutation = useMutation(() => userService.deleteUser(idDeleted), {
-    onSuccess: () => {
-      queryClient.invalidateQueries('users');
-      setIdDeleted('');
-      setOpenModalConfirmExclude(false);
-      feedback('Registro excluído com sucesso', 'success');
+  const {data, isLoading} = useQuery('providers', () =>
+    providerService.getProviders(),
+  );
+
+  const mutation = useMutation(
+    () => providerService.deleteProvider(idDeleted),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('providers');
+        setIdDeleted('');
+        setOpenModalConfirmExclude(false);
+        feedback('Registro excluído com sucesso', 'success');
+      },
+      onError: () => {
+        setIdDeleted('');
+        setOpenModalConfirmExclude(false);
+        feedback('Erro ao excluir registro', 'error');
+      },
     },
-    onError: () => {
-      setIdDeleted('');
-      setOpenModalConfirmExclude(false);
-      feedback('Erro ao excluir registro', 'error');
-    },
-  });
+  );
 
-  const handleEditModal = useCallback((row: IUser) => {
-    setUser(row);
+  const handleEditModal = useCallback((row: IProvider) => {
+    setProvider(row);
 
     setOpenModal(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
-    setUser(undefined);
+    setProvider(undefined);
 
     setOpenModal(false);
   }, []);
 
   const handleClickModal = useCallback(() => {
-    setUser(undefined);
+    setProvider(undefined);
 
     setOpenModal(false);
-    queryClient.invalidateQueries('users');
+    queryClient.invalidateQueries('providers');
   }, [queryClient]);
 
   const handleDelete = useCallback((id: string) => {
@@ -74,17 +86,34 @@ const Users: React.FC = () => {
       return data.filter(
         (item) =>
           item.name.toLowerCase().includes(filter.toLowerCase()) ||
-          item.cpf.toLowerCase().includes(filter.toLowerCase()),
+          item.shopping.toLowerCase().includes(filter.toLowerCase()),
       );
     }
     return [];
   }, [data, filter]);
 
+  if (isLoading) {
+    return <LinearDeterminate />;
+  }
+
   return (
     <>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Title title="Gestão de usuários" />
+        <Grid item xs={12} sm={6}>
+          <Title title="Gestão de fornecedores" />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Stack direction="row" justifyContent="flex-end">
+            <Button
+              fullWidth={!matches}
+              label="Adicionar novo"
+              startIcon={<AddRounded />}
+              variant="outlined"
+              onClick={() => setOpenModal(true)}
+              disabled={isLoading}
+            />
+          </Stack>
         </Grid>
 
         <Grid item xs={12}>
@@ -92,7 +121,7 @@ const Users: React.FC = () => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <InputSearch
-                  placeholder="Pesquisar por nome ou CPF..."
+                  placeholder="Pesquisar por nome ou Shopping..."
                   value={filter}
                   onChange={({target}) => setFilter(target.value)}
                 />
@@ -112,7 +141,7 @@ const Users: React.FC = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Subtitle subtitle="Usuários" />
+          <Subtitle subtitle="Fornecedores" />
         </Grid>
 
         <Grid item xs={12}>
@@ -132,65 +161,54 @@ const Users: React.FC = () => {
                   <>
                     <Tooltip title="Editar">
                       <IconButton onClick={() => handleEditModal(params.row)}>
-                        <EditRounded color="primary" />
+                        <EditRounded color="action" />
                       </IconButton>
                     </Tooltip>
 
                     <Tooltip title="Deletar">
                       <IconButton onClick={() => handleDelete(params.row.id)}>
-                        <DeleteRounded color="primary" />
+                        <DeleteRounded color="error" />
                       </IconButton>
                     </Tooltip>
                   </>
                 ),
               },
               {
-                field: 'imageUrl',
-                headerName: 'Imagem',
-                width: 75,
-                align: 'center',
-                headerAlign: 'center',
-                renderCell: (params) => <Avatar src={params.row.imageUrl} />,
-              },
-              {
                 field: 'name',
                 headerName: 'Nome',
                 minWidth: 250,
-              },
-              {
-                field: 'email',
-                headerName: 'E-mail',
-                minWidth: 200,
-              },
-              {
-                field: 'cpf',
-                headerName: 'CPF',
-                minWidth: 200,
-                renderCell: (params) => cpfMask(params.row.cpf),
+                flex: 2,
               },
               {
                 field: 'phone',
                 headerName: 'Telefone',
                 minWidth: 130,
                 renderCell: (params) => phoneMask(params.row.phone),
+                flex: 1,
               },
               {
-                field: 'type',
-                headerName: 'Tipo',
-                minWidth: 280,
-                renderCell: (params) => userType(params.row.type),
+                field: 'sellerProvider',
+                headerName: 'Vendedora da loja',
+                minWidth: 200,
+                flex: 1,
+              },
+              {
+                field: 'shopping',
+                headerName: 'Shopping',
+                minWidth: 200,
+                flex: 1,
               },
             ]}
-            rows={filteredData || []}
+            rows={filteredData}
           />
         </Grid>
       </Grid>
 
-      <ModalUser
+      <ModalProvider
         openModal={openModal}
         onClick={handleClickModal}
         onClose={handleCloseModal}
-        initialData={user}
+        initialData={provider}
       />
 
       <ModalConfirm
@@ -205,4 +223,4 @@ const Users: React.FC = () => {
   );
 };
 
-export default Users;
+export default Providers;

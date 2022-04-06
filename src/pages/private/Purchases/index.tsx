@@ -83,7 +83,7 @@ const Purchases: React.FC = () => {
           <Stack direction="row" justifyContent="flex-end">
             <Button
               fullWidth={!matches}
-              label="Adicionar"
+              label="Adicionar novo"
               startIcon={<AddRounded />}
               variant="outlined"
               onClick={() => navigate('/compras/nova')}
@@ -152,11 +152,14 @@ const Purchases: React.FC = () => {
                 disableReorder: true,
                 disableExport: true,
                 sortable: false,
-                renderCell: () => (
+                renderCell: (params) => (
                   <>
                     <Tooltip title="Detalhes">
-                      <IconButton>
-                        <VisibilityRounded color="primary" />
+                      <IconButton
+                        onClick={() =>
+                          navigate(`/compras/editar/${params.row.id}`)
+                        }>
+                        <VisibilityRounded />
                       </IconButton>
                     </Tooltip>
                   </>

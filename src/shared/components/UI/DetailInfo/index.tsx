@@ -19,20 +19,17 @@ export const DetailInfo: React.FC<IProps> = ({data, title, value}) => {
       p={3}
       spacing={1}
       alignItems="center">
-      <Typography
-        color="whitesmoke"
-        variant={matches ? 'h4' : 'h6'}
-        align="center">
+      <Typography color="whitesmoke" variant="h4" align="center">
         {data}
       </Typography>
       {value && (
-        <Typography color="whitesmoke" align="center" variant="caption">{`R$ ${
+        <Typography color="whitesmoke" align="center" variant="h4">{`R$ ${
           value.toFixed(2) || 0
         }`}</Typography>
       )}
       <Typography
         color="whitesmoke"
-        variant={matches ? 'body1' : 'body2'}
+        variant={matches ? 'h6' : 'body2'}
         align="center">
         {title}
       </Typography>

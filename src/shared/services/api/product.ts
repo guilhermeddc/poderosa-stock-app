@@ -1,3 +1,4 @@
+import {GridSelectionModel} from '@mui/x-data-grid';
 import {
   addDoc,
   deleteDoc,
@@ -27,6 +28,7 @@ export interface IProduct {
   provider: IProvider;
   sold: boolean;
   travel?: string;
+  purchase: string;
 }
 
 export interface ICreateProduct {
@@ -65,7 +67,7 @@ const getProducts = async (): Promise<IListProduct> => {
           id: data.id,
           seller: data.data().seller
             ? await sellerService.getSeller(data.data().seller)
-            : null,
+            : {id: ''},
           provider: await providerService.getProvider(data.data().provider),
         };
       }) as Promise<IProduct>[],
@@ -214,6 +216,25 @@ const changeSoldProduct = async (
   }
 };
 
+const transferProducts = async (
+  ids: GridSelectionModel,
+  seller: string,
+): Promise<IRequestResult> => {
+  try {
+    await Promise.all(
+      ids.map(async (id) => {
+        await updateDoc(doc(productDB, String(id)), {seller});
+      }),
+    );
+
+    return {success: true};
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
 const deleteProduct = async (id: string): Promise<IRequestResult> => {
   try {
     await deleteDoc(doc(productDB, id));
@@ -232,5 +253,6 @@ export const productService = {
   createProduct,
   deleteProduct,
   updateProduct,
+  transferProducts,
   changeSoldProduct,
 };

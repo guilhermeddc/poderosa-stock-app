@@ -9,26 +9,31 @@ import {
 import {IRequestResult} from 'shared/interfaces';
 import {providerDB} from 'shared/services/firebase';
 
+import {shoppingService} from './shopping';
+
 export interface IProvider {
   id: string;
   name: string;
-  email: string;
   phone: string;
-  cnpj: string;
+  sellerProvider: string;
+  shopping: string;
 }
 
 const getProviders = async (): Promise<IProvider[]> => {
   try {
     const providerSnapshot = await getDocs(providerDB);
-    const providerList = providerSnapshot.docs.map((doc) => {
-      return {
-        id: doc.id,
-        name: doc.data().name,
-        email: doc.data().email,
-        phone: doc.data().phone,
-        cnpj: doc.data().cnpj,
-      };
-    });
+    const providerList = await Promise.all(
+      providerSnapshot.docs.map(async (doc) => {
+        return {
+          id: doc.id,
+          name: doc.data().name,
+          phone: doc.data().phone,
+          sellerProvider: doc.data().sellerProvider,
+          shopping: (await shoppingService.getShopping(doc.data().shopping))
+            .name,
+        };
+      }),
+    );
 
     return providerList;
   } catch (error: any) {

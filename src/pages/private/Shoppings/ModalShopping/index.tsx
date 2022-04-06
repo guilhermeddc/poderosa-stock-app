@@ -2,19 +2,19 @@ import React, {useCallback, useRef} from 'react';
 
 import {Grid} from '@mui/material';
 import {FormHandles} from '@unform/core';
-import {Form, Modal, NumberFormat, TextField} from 'shared/components';
+import {Form, Modal, TextField} from 'shared/components';
 import getValidationErrors from 'shared/helpers/getValidationErrors';
-import {IProvider, providerService} from 'shared/services/api/provider';
+import {IShopping, shoppingService} from 'shared/services/api/shopping';
 import * as Yup from 'yup';
 
 interface IProps {
   openModal: boolean;
   onClick(): void;
   onClose(): void;
-  initialData?: IProvider;
+  initialData?: IShopping;
 }
 
-export const ModalProvider: React.FC<IProps> = ({
+export const ModalShopping: React.FC<IProps> = ({
   openModal,
   onClick,
   onClose,
@@ -29,9 +29,8 @@ export const ModalProvider: React.FC<IProps> = ({
 
         const schema = Yup.object().shape({
           name: Yup.string().required(),
-          cnpj: Yup.string().required(),
-          phone: Yup.string().required(),
-          email: Yup.string().required().email(),
+          city: Yup.string().required(),
+          uf: Yup.string().required(),
         });
 
         await schema.validate(data, {
@@ -39,8 +38,8 @@ export const ModalProvider: React.FC<IProps> = ({
         });
 
         if (initialData)
-          await providerService.updateProvider(initialData.id, data);
-        else await providerService.createProvider(data);
+          await shoppingService.updateShopping(initialData.id, data);
+        else await shoppingService.createShopping(data);
 
         onClick();
       } catch (err) {
@@ -62,7 +61,7 @@ export const ModalProvider: React.FC<IProps> = ({
       opened={openModal}
       onClick={handleClick}
       onClose={onClose}
-      title={initialData ? 'Editar vendedor(a)' : 'Adicionar nova vendedor(a)'}
+      title={initialData ? 'Editar shopping' : 'Adicionar novo shopping'}
       labelCloseButton="Fechar"
       labelSaveButton="Salvar">
       <Form ref={formRef} onSubmit={handleOnSubmit} initialData={initialData}>
@@ -71,28 +70,12 @@ export const ModalProvider: React.FC<IProps> = ({
             <TextField name="name" label="Nome" />
           </Grid>
 
-          <Grid item xs={12}>
-            <TextField name="email" label="E-mail" />
+          <Grid item xs={10}>
+            <TextField name="city" label="Cidade" />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
-            <NumberFormat
-              fullWidth
-              name="cnpj"
-              label="CNPJ"
-              prefix=""
-              format="##.###.###/####-##"
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <NumberFormat
-              fullWidth
-              name="phone"
-              label="Telefone"
-              prefix=""
-              format="(##) #####-####"
-            />
+          <Grid item xs={2}>
+            <TextField name="uf" label="UF" />
           </Grid>
         </Grid>
       </Form>
