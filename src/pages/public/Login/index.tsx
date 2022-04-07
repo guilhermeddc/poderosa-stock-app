@@ -1,6 +1,7 @@
 import React from 'react';
 
-import {Box, Button, Typography, useMediaQuery} from '@mui/material';
+import {Facebook} from '@mui/icons-material';
+import {Box, Button, Stack, Typography, useMediaQuery} from '@mui/material';
 import {google, logo} from 'shared/assets';
 import {Copyright} from 'shared/components';
 import {useAuth} from 'shared/hooks';
@@ -23,10 +24,10 @@ export const Login: React.FC = () => {
         <img src={logo} alt="logo poderosa stock" width={matches ? 350 : 250} />
       </Box>
 
-      <Box component="form" noValidate sx={{mt: 5}}>
+      <Stack component="form" noValidate gap={2} mt={5}>
         <Button
           variant="contained"
-          onClick={signIn}
+          onClick={() => signIn('google')}
           style={{backgroundColor: 'white', color: 'black'}}>
           <Box display="flex" alignItems="center" gap={1}>
             <img src={google} width={32} />
@@ -34,10 +35,20 @@ export const Login: React.FC = () => {
           </Box>
         </Button>
 
+        <Button
+          variant="contained"
+          onClick={() => signIn('facebook')}
+          style={{backgroundColor: '#5070a8', color: 'black'}}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Facebook htmlColor="whitesmoke" sx={{height: 32, width: 32}} />
+            <Typography color="whitesmoke">Entrar com o Facebook</Typography>
+          </Box>
+        </Button>
+
         <Box sx={{mt: 5, mb: 5}}>
           <Copyright />
         </Box>
-      </Box>
+      </Stack>
     </Box>
   );
 };

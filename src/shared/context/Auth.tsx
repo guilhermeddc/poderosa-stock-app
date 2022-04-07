@@ -9,7 +9,7 @@ export interface IAuthContext {
   isAdmin: boolean;
   isSeller: boolean;
   user: IUser;
-  signIn: () => Promise<void>;
+  signIn: (type: string) => Promise<void>;
   signOut: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -21,15 +21,21 @@ export const AuthProvider: React.FC = ({children}) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isSeller, setIsSeller] = useState<boolean>(false);
 
-  const handleSignIn = useCallback(async () => {
+  const handleSignIn = useCallback(async (type: string) => {
     try {
-      const response = await authService.signIn();
+      const response = await authService.signIn(type);
 
       localStorage.setItem('@user', JSON.stringify(response));
 
-      setUser(response);
-      setIsAdmin(response.type.includes('k96XdK1e3zBOY5dimeE9'));
-      setIsSeller(response.type.includes('8G5ap05MOUpfLg3OqrTl'));
+      if (response) {
+        setUser(response);
+        setIsAdmin(
+          response.type.includes(String(process.env.REACT_APP_ADMIN_ID)),
+        );
+        setIsSeller(
+          response.type.includes(String(process.env.REACT_APP_SELLER_ID)),
+        );
+      }
     } catch (error) {
       feedback(String(error), 'error');
     }
@@ -68,8 +74,10 @@ export const AuthProvider: React.FC = ({children}) => {
       setIsSeller(
         JSON.parse(userStorage).type.includes('8G5ap05MOUpfLg3OqrTl'),
       );
+
+      handleRefreshUser();
     }
-  }, []);
+  }, [handleRefreshUser, user.id]);
 
   return (
     <AuthContext.Provider

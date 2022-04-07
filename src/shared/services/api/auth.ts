@@ -1,4 +1,5 @@
 import {
+  FacebookAuthProvider,
   GoogleAuthProvider,
   inMemoryPersistence,
   setPersistence,
@@ -13,7 +14,8 @@ import {auth, userDB, userTypeDB} from 'shared/services/firebase';
 import {notificationService} from './notifications';
 import {IUser, userService} from './user';
 
-const provider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
 
 const getUser = async (uid: string): Promise<IUser> => {
   try {
@@ -47,8 +49,10 @@ const getUserType = async (): Promise<IUserType[]> => {
   }
 };
 
-const signIn = async (): Promise<IUser> => {
+const signIn = async (type: string): Promise<IUser | null> => {
   try {
+    const provider = type === 'google' ? googleProvider : facebookProvider;
+
     const resUser = await signInWithPopup(auth, provider);
     const authUser: User = resUser.user;
     const user = await getUser(authUser.uid);
@@ -62,6 +66,7 @@ const signIn = async (): Promise<IUser> => {
         phone: '',
         cpf: '',
         type: [],
+        updated: false,
       });
 
       await notificationService.createNotification({

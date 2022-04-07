@@ -4,16 +4,28 @@ import {ptBR} from '@mui/material/locale';
 export const theme = createTheme(
   {
     palette: {
+      // primary: {
+      //   main: '#0d47a1',
+      //   light: '#5472d3',
+      //   dark: '#002171',
+      //   contrastText: '#FFFFFF',
+      // },
+      // secondary: {
+      //   main: '#64b5f6 ',
+      //   light: '#9be7ff',
+      //   dark: '#2286c3',
+      //   contrastText: '#FFFFFF',
+      // },
       primary: {
-        main: '#0d47a1',
-        light: '#5472d3',
-        dark: '#002171',
+        main: '#d09b73',
+        light: '#ffcca2',
+        dark: '#9d6d47',
         contrastText: '#FFFFFF',
       },
       secondary: {
-        main: '#64b5f6 ',
-        light: '#9be7ff',
-        dark: '#2286c3',
+        main: '#a48155 ',
+        light: '#d7b082',
+        dark: '#73552b',
         contrastText: '#FFFFFF',
       },
       error: {
