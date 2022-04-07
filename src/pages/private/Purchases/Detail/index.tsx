@@ -252,19 +252,21 @@ const PurchaseDetail: React.FC = () => {
                   <Stack direction="row" justifyContent="flex-end" spacing={3}>
                     {!id && (
                       <Button
-                        label="Cancelar compra"
+                        label={matches ? 'Cancelar compra' : 'Cancelar'}
                         variant="outlined"
                         onClick={handleCancelPurchase}
                         disabled={loading}
-                        minWidth={180}
+                        minWidth={matches ? 180 : undefined}
+                        fullWidth
                       />
                     )}
 
                     <Button
-                      label="Salvar compra"
+                      label={matches ? 'Salvar compra' : 'Salvar'}
                       type="submit"
                       disabled={loading}
-                      minWidth={180}
+                      minWidth={matches ? 180 : undefined}
+                      fullWidth
                     />
                   </Stack>
                 </Grid>

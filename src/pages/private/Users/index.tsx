@@ -2,7 +2,14 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
 
 import {EditRounded, DeleteRounded} from '@mui/icons-material';
-import {Grid, Tooltip, IconButton, Avatar, Stack} from '@mui/material';
+import {
+  Grid,
+  Tooltip,
+  IconButton,
+  Avatar,
+  Stack,
+  useMediaQuery,
+} from '@mui/material';
 import {
   Title,
   FilterData,
@@ -27,6 +34,7 @@ const Users: React.FC = () => {
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
   const queryClient = useQueryClient();
+  const matches = useMediaQuery('(min-width:769px)');
 
   const {data} = useQuery('users', () => userService.getUsers());
 
@@ -102,6 +110,7 @@ const Users: React.FC = () => {
                 <Stack direction="row" justifyContent="flex-end">
                   <Button
                     label="Limpar filtros"
+                    fullWidth={!matches}
                     minWidth={180}
                     onClick={() => setFilter('')}
                   />

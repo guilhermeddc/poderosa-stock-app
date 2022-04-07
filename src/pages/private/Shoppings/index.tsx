@@ -129,6 +129,7 @@ export const Shoppings: React.FC = () => {
                   <Button
                     label="Limpar filtros"
                     minWidth={180}
+                    fullWidth={!matches}
                     onClick={() => setFilter('')}
                   />
                 </Stack>

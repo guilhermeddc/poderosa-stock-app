@@ -3,7 +3,7 @@ import {useQuery} from 'react-query';
 import {useNavigate} from 'react-router-dom';
 
 import {VisibilityRounded} from '@mui/icons-material';
-import {Grid, IconButton, Stack, Tooltip} from '@mui/material';
+import {Grid, IconButton, Stack, Tooltip, useMediaQuery} from '@mui/material';
 import {
   Button,
   DataGrid,
@@ -22,6 +22,7 @@ export const Sellers: React.FC = () => {
 
   const navigate = useNavigate();
   const {setTitle} = useTitle();
+  const matches = useMediaQuery('(min-width:769px)');
 
   useEffect(() => {
     setTitle('Vendedores');
@@ -69,6 +70,7 @@ export const Sellers: React.FC = () => {
                   <Button
                     label="Limpar filtros"
                     minWidth={180}
+                    fullWidth={!matches}
                     onClick={() => setFilter('')}
                   />
                 </Stack>

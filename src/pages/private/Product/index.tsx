@@ -287,6 +287,7 @@ export const Product: React.FC = () => {
                 <Stack direction="row" justifyContent="flex-end">
                   <Button
                     label="Limpar filtros"
+                    fullWidth={!matches}
                     minWidth={180}
                     onClick={handleResetFilter}
                   />

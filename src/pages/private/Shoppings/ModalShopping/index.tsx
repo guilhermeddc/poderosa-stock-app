@@ -1,6 +1,6 @@
 import React, {useCallback, useRef} from 'react';
 
-import {Grid} from '@mui/material';
+import {Grid, useMediaQuery} from '@mui/material';
 import {FormHandles} from '@unform/core';
 import {Form, Modal, TextField} from 'shared/components';
 import getValidationErrors from 'shared/helpers/getValidationErrors';
@@ -21,6 +21,7 @@ export const ModalShopping: React.FC<IProps> = ({
   initialData,
 }) => {
   const formRef = useRef<FormHandles>(null);
+  const matches = useMediaQuery('(min-width:769px)');
 
   const handleOnSubmit = useCallback(
     async (data) => {
@@ -70,11 +71,11 @@ export const ModalShopping: React.FC<IProps> = ({
             <TextField name="name" label="Nome" />
           </Grid>
 
-          <Grid item xs={10}>
+          <Grid item xs={matches ? 10 : 8}>
             <TextField name="city" label="Cidade" />
           </Grid>
 
-          <Grid item xs={2}>
+          <Grid item xs={matches ? 2 : 4}>
             <TextField name="uf" label="UF" />
           </Grid>
         </Grid>

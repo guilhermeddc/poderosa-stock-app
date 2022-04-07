@@ -14,9 +14,8 @@ export const DetailInfo: React.FC<IProps> = ({data, title, value}) => {
   return (
     <Stack
       component={Paper}
-      variant="outlined"
       bgcolor="primary.main"
-      p={3}
+      p={2}
       spacing={1}
       alignItems="center">
       <Typography color="whitesmoke" variant="h4" align="center">

@@ -7,6 +7,7 @@ import {
   Typography,
   Box,
   useMediaQuery,
+  Grid,
 } from '@mui/material';
 
 import {Button} from '../Button';
@@ -41,7 +42,10 @@ export const Modal: React.FC<IProps> = ({
     <Dialog open={opened} onClose={onClose} maxWidth={maxWidth} fullWidth>
       {title && (
         <Box pt={3} pb={1} px={3}>
-          <Typography variant="h5" fontWeight={500} color="primary">
+          <Typography
+            variant={matches ? 'h5' : 'h6'}
+            fontWeight={500}
+            color="primary">
             {title}
           </Typography>
         </Box>
@@ -53,24 +57,53 @@ export const Modal: React.FC<IProps> = ({
             pb: 3,
             px: 3,
           }}>
-          {labelCloseButton && (
-            <Button
-              variant="outlined"
-              fullWidth={!matches}
-              disabled={loading}
-              onClick={onClose}
-              label={labelCloseButton}
-            />
-          )}
-          <Box marginLeft={2} />
-          {labelSaveButton && (
-            <Button
-              label={labelSaveButton}
-              fullWidth={!matches}
-              onClick={onClick}
-              loading={loading}
-              disabled={loading || disabled}
-            />
+          {!matches ? (
+            <Grid container spacing={3}>
+              {labelCloseButton && (
+                <Grid item xs={6}>
+                  <Button
+                    variant="outlined"
+                    fullWidth={!matches}
+                    disabled={loading}
+                    onClick={onClose}
+                    label={labelCloseButton}
+                  />
+                </Grid>
+              )}
+              {labelSaveButton && (
+                <Grid item xs={6}>
+                  <Button
+                    label={labelSaveButton}
+                    fullWidth={!matches}
+                    onClick={onClick}
+                    loading={loading}
+                    disabled={loading || disabled}
+                  />
+                </Grid>
+              )}
+            </Grid>
+          ) : (
+            <>
+              {labelCloseButton && (
+                <Button
+                  variant="outlined"
+                  fullWidth={!matches}
+                  disabled={loading}
+                  onClick={onClose}
+                  label={labelCloseButton}
+                />
+              )}
+              <Box marginLeft={2} />
+              {labelSaveButton && (
+                <Button
+                  label={labelSaveButton}
+                  fullWidth={!matches}
+                  onClick={onClick}
+                  loading={loading}
+                  disabled={loading || disabled}
+                />
+              )}
+            </>
           )}
         </DialogActions>
       )}
