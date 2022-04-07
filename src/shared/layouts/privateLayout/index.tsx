@@ -5,7 +5,7 @@ import {useDrawer} from 'shared/hooks';
 
 import {AppBar, Drawer, AlertComponent} from './components';
 
-export const BaseLayout: React.FC = ({children}) => {
+export const PrivateLayout: React.FC = ({children}) => {
   const [buttonActive, setButtonActive] = useState(false);
 
   const {drawerOpen, setDrawerOpen, menuOptions} = useDrawer();

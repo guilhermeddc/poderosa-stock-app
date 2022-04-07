@@ -13,6 +13,7 @@ export interface IUser {
   admin?: boolean;
   seller?: boolean;
   type: string[];
+  updated?: boolean;
 }
 
 const createUserByGoogle = async (payload: IUser): Promise<IRequestResult> => {

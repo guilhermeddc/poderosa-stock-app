@@ -2,7 +2,7 @@ import React, {lazy, Suspense} from 'react';
 import {Routes, Route, Navigate} from 'react-router-dom';
 
 import {LinearDeterminate} from 'shared/components';
-import {BaseLayout} from 'shared/layouts';
+import {PrivateLayout} from 'shared/layouts';
 
 const Home = lazy(() => import('pages/private/Home'));
 const Product = lazy(() => import('pages/private/Product'));
@@ -16,7 +16,7 @@ const Shoppings = lazy(() => import('pages/private/Shoppings'));
 
 export const PrivateRoutes: React.FC = () => {
   return (
-    <BaseLayout>
+    <PrivateLayout>
       <Suspense fallback={<LinearDeterminate />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -33,6 +33,6 @@ export const PrivateRoutes: React.FC = () => {
           <Route path="*" element={() => <Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-    </BaseLayout>
+    </PrivateLayout>
   );
 };

@@ -9,13 +9,15 @@ export * from './UI/CardInfo';
 export * from './UI/ClipperStatus';
 export * from './UI/InputSearch';
 export * from './UI/Header';
-export * from './UI/Copyright';
 export * from './UI/FilterData';
 export * from './UI/LinearDeterminate';
 export * from './UI/Title';
 export * from './UI/Subtitle';
 export * from './UI/DetailInfo';
-export * from './UI/Notification';
+
+export * from './Common/Notification';
+export * from './Common/Copyright';
+export * from './Common/UserForm';
 
 export * from './Form/Checkbox';
 export * from './Form/MultiSelect';

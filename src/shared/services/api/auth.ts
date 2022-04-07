@@ -70,8 +70,6 @@ const signIn = async (): Promise<IUser> => {
         link: `/users/profile/${authUser.uid}`,
         icon: 'add_alert',
       });
-
-      await signOut();
     }
 
     return user;
@@ -112,5 +110,6 @@ export const authService = {
   signIn,
   signOut,
   signPersist,
+  getUser,
   getUserType,
 };

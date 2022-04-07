@@ -11,6 +11,7 @@ export interface IAuthContext {
   user: IUser;
   signIn: () => Promise<void>;
   signOut: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<IAuthContext>({} as IAuthContext);
@@ -33,6 +34,18 @@ export const AuthProvider: React.FC = ({children}) => {
       feedback(String(error), 'error');
     }
   }, []);
+
+  const handleRefreshUser = useCallback(async () => {
+    try {
+      const response = await authService.getUser(user.id);
+
+      localStorage.setItem('@user', JSON.stringify(response));
+
+      setUser(response);
+    } catch (error) {
+      feedback(String(error), 'error');
+    }
+  }, [user.id]);
 
   const handleSignOut = useCallback(() => {
     try {
@@ -63,6 +76,7 @@ export const AuthProvider: React.FC = ({children}) => {
       value={{
         signIn: handleSignIn,
         signOut: handleSignOut,
+        refreshUser: handleRefreshUser,
         authenticated: !!user.id,
         isAdmin: isAdmin || (isAdmin && isSeller),
         isSeller: !isAdmin && isSeller,
