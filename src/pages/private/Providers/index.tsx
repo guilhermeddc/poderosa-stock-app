@@ -86,7 +86,7 @@ export const Providers: React.FC = () => {
       return data.filter(
         (item) =>
           item.name.toLowerCase().includes(filter.toLowerCase()) ||
-          item.shopping.toLowerCase().includes(filter.toLowerCase()),
+          item.shopping.name.toLowerCase().includes(filter.toLowerCase()),
       );
     }
     return [];
@@ -198,6 +198,7 @@ export const Providers: React.FC = () => {
                 headerName: 'Shopping',
                 minWidth: 200,
                 flex: 1,
+                renderCell: (params) => params.row.shopping.name || '',
               },
             ]}
             rows={filteredData}

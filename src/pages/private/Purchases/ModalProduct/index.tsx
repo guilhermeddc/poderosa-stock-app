@@ -24,7 +24,7 @@ export const ModalProduct: React.FC<IProps> = ({
   initialData,
   idPurchase,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formRef = useRef<FormHandles>(null);
 
@@ -34,7 +34,7 @@ export const ModalProduct: React.FC<IProps> = ({
 
   const handleOnSubmit = useCallback(
     async (data) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         formRef.current?.setErrors({});
 
@@ -81,7 +81,7 @@ export const ModalProduct: React.FC<IProps> = ({
           formRef.current?.setErrors(errors);
         }
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     [initialData, onClick, idPurchase],
@@ -97,7 +97,7 @@ export const ModalProduct: React.FC<IProps> = ({
       onClick={handleClick}
       onClose={onClose}
       title={initialData ? 'Editar produto' : 'Adicionar novo produto'}
-      loading={loading}
+      loading={isLoading}
       labelCloseButton="Cancelar"
       labelSaveButton={initialData ? 'Salvar' : 'Adicionar'}>
       <Form

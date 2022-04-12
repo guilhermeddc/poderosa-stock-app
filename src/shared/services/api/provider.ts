@@ -9,14 +9,14 @@ import {
 import {IRequestResult} from 'shared/interfaces';
 import {providerDB} from 'shared/services/firebase';
 
-import {shoppingService} from './shopping';
+import {IShopping, shoppingService} from './shopping';
 
 export interface IProvider {
   id: string;
   name: string;
   phone: string;
   sellerProvider: string;
-  shopping: string;
+  shopping: IShopping;
 }
 
 const getProviders = async (): Promise<IProvider[]> => {
@@ -29,8 +29,7 @@ const getProviders = async (): Promise<IProvider[]> => {
           name: doc.data().name,
           phone: doc.data().phone,
           sellerProvider: doc.data().sellerProvider,
-          shopping: (await shoppingService.getShopping(doc.data().shopping))
-            .name,
+          shopping: await shoppingService.getShopping(doc.data().shopping),
         };
       }),
     );

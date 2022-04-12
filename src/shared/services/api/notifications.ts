@@ -26,6 +26,7 @@ export interface ICreateNotification {
   body: string;
   icon?: string;
   link: string;
+  isAdmin?: boolean;
 }
 
 const createNotification = async (
@@ -46,12 +47,16 @@ const createNotification = async (
   }
 };
 
-const getNotifications = async (): Promise<INotification[]> => {
+const getNotifications = async (
+  isAdmin: boolean,
+  visualized = false,
+): Promise<INotification[]> => {
   try {
     const notifications = await getDocs(
       query(
         notificationDB,
-        where('visualized', '==', false),
+        where('visualized', '==', visualized),
+        where('isAdmin', '==', isAdmin),
         orderBy('createdAt', 'desc'),
       ),
     );

@@ -12,6 +12,7 @@ import {
 import {IRequestResult} from 'shared/interfaces';
 import {productDB} from 'shared/services/firebase';
 
+import {notificationService} from './notifications';
 import {IProvider, providerService} from './provider';
 import {ISeller, sellerService} from './seller';
 
@@ -191,6 +192,14 @@ const updateProduct = async (
       ...payload,
       purchaseValue: Number(payload.purchaseValue),
       saleValue: Number(payload.saleValue),
+    });
+
+    await notificationService.createNotification({
+      title: `Produto atualizado`,
+      body: `O produto ${payload.description} foi atualizado`,
+      link: `/produtos?filter=${payload.code}`,
+      icon: 'add_alert',
+      isAdmin: false,
     });
 
     return {success: true};

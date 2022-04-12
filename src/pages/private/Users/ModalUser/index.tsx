@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 
 import {Divider, Grid, MenuItem} from '@mui/material';
 import {FormHandles} from '@unform/core';
@@ -21,10 +21,13 @@ export const ModalUser: React.FC<IProps> = ({
   onClose,
   initialData,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const formRef = useRef<FormHandles>(null);
 
   const handleOnSubmit = useCallback(
     async (data) => {
+      setIsLoading(true);
       try {
         formRef.current?.setErrors({});
 
@@ -56,6 +59,8 @@ export const ModalUser: React.FC<IProps> = ({
           const errors = getValidationErrors(err as Yup.ValidationError);
           formRef.current?.setErrors(errors);
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     [initialData, onClick],
@@ -71,6 +76,7 @@ export const ModalUser: React.FC<IProps> = ({
       onClick={handleClick}
       onClose={onClose}
       title="Editar usuário"
+      loading={isLoading}
       labelCloseButton="Fechar"
       labelSaveButton="Salvar">
       <Form ref={formRef} onSubmit={handleOnSubmit} initialData={initialData}>

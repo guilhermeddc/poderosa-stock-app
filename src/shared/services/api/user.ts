@@ -16,7 +16,7 @@ export interface IUser {
   updated?: boolean;
 }
 
-const createUserByGoogle = async (payload: IUser): Promise<IRequestResult> => {
+const createUserByLogin = async (payload: IUser): Promise<IRequestResult> => {
   try {
     await setDoc(doc(userDB, payload.id), payload);
 
@@ -73,7 +73,7 @@ const deleteUser = async (id: string): Promise<IRequestResult> => {
 };
 
 export const userService = {
-  createUserByGoogle,
+  createUserByLogin,
   getUsers,
   deleteUser,
   updateUser,

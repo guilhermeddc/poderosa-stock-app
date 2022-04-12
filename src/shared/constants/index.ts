@@ -23,12 +23,12 @@ export const adminMenu = [
     icon: 'attach_money',
     path: '/compras',
   },
-  {
-    id: 'sell',
-    label: 'Vendas',
-    icon: 'sell',
-    path: '/vendas',
-  },
+  // {
+  //   id: 'sell',
+  //   label: 'Vendas',
+  //   icon: 'sell',
+  //   path: '/vendas',
+  // },
   // {
   //   id: 'movements',
   //   label: 'Movimentos',
@@ -41,12 +41,12 @@ export const adminMenu = [
     icon: 'integration_instructions',
     path: '/fornecedores',
   },
-  {
-    id: 'clients',
-    label: 'Clientes',
-    icon: 'assignment_ind',
-    path: '/clientes',
-  },
+  // {
+  //   id: 'clients',
+  //   label: 'Clientes',
+  //   icon: 'assignment_ind',
+  //   path: '/clientes',
+  // },
   {
     id: 'salesman',
     label: 'Vendedores',

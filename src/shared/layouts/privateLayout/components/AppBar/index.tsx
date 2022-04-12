@@ -55,9 +55,8 @@ export const AppBar: React.FC<IProps> = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const {data} = useQuery(
-    'notifications',
-    notificationService.getNotifications,
+  const {data} = useQuery('notifications', () =>
+    notificationService.getNotifications(isAdmin),
   );
 
   const handleClickNotifyMenu = useCallback(
@@ -118,7 +117,7 @@ export const AppBar: React.FC<IProps> = ({
               </ListItemIcon>
 
               {matches && (
-                <Box ml={4} mr={2} height={16} width="1px" bgcolor="#B3DBD9" />
+                <Box ml={4} mr={2} height={16} width="1px" bgcolor="white" />
               )}
 
               <img src={logoRet} alt="GVCentris" height={32} />
@@ -190,7 +189,7 @@ export const AppBar: React.FC<IProps> = ({
             </MenuItem>
           </Menu>
 
-          <Box ml={1} height={16} width="1px" bgcolor="#B3DBD9" />
+          <Box ml={1} height={16} width="1px" bgcolor="white" />
 
           <Box gap={2} display="flex" alignItems="center">
             {user?.imageUrl && user.name ? (

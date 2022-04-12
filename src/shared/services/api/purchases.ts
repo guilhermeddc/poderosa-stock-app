@@ -11,6 +11,7 @@ import {
 import {IRequestResult} from 'shared/interfaces';
 
 import {productDB, purchaseDB, purchaseTypeDB} from '../firebase';
+import {notificationService} from './notifications';
 import {IProduct} from './product';
 import {providerService} from './provider';
 
@@ -51,7 +52,7 @@ const getPurchases = async (): Promise<IPurchase[]> => {
   }
 };
 
-const getPurchase = async (id: string): Promise<IPurchase> => {
+const getPurchase = async (id: string | undefined): Promise<IPurchase> => {
   try {
     const purchase = await getDoc(doc(purchaseDB, id));
 
@@ -111,6 +112,8 @@ export interface ICreatePurchase {
   type: string;
   quantity: number;
   purchaseValue: number;
+  createdAt?: Date;
+  updatedAt?: Date;
   saleValue: number;
   profitValue: number;
 }
@@ -125,8 +128,9 @@ const createPurchase = async (): Promise<string> => {
       return purchaseExists.docs[0].id as string;
     }
 
-    const res = await addDoc(purchaseDB, {
+    const response = await addDoc(purchaseDB, {
       name: '',
+      createdAt: new Date(),
       profitValue: 0,
       quantity: 0,
       purchaseValue: 0,
@@ -134,7 +138,7 @@ const createPurchase = async (): Promise<string> => {
       type: '',
     });
 
-    return res.id;
+    return response.id;
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
@@ -143,11 +147,26 @@ const createPurchase = async (): Promise<string> => {
 };
 
 const updatePurchase = async (
-  id: string,
+  id: string | undefined,
   payload: ICreatePurchase,
 ): Promise<IRequestResult> => {
   try {
-    await updateDoc(doc(purchaseDB, id), {...payload});
+    id &&
+      (await updateDoc(doc(purchaseDB, id), {
+        ...payload,
+        updatedAt: new Date(),
+        profitValue: Number(payload.profitValue.toFixed(2)),
+        purchaseValue: Number(payload.purchaseValue.toFixed(2)),
+        saleValue: Number(payload.saleValue.toFixed(2)),
+      }));
+
+    await notificationService.createNotification({
+      title: 'Novos produtos',
+      body: `Foram adicionados ${payload.quantity} novos produtos`,
+      link: `/produtos?compra=${id}`,
+      icon: 'add_alert',
+      isAdmin: false,
+    });
 
     return {success: true};
   } catch (error: any) {
@@ -158,11 +177,11 @@ const updatePurchase = async (
 };
 
 const deletePurchase = async (
-  id: string,
+  id: string | undefined,
   productsIds: string[] | undefined,
 ): Promise<IRequestResult> => {
   try {
-    await deleteDoc(doc(purchaseDB, id));
+    id && (await deleteDoc(doc(purchaseDB, id)));
 
     if (productsIds) {
       await Promise.all(
@@ -180,7 +199,9 @@ const deletePurchase = async (
   }
 };
 
-const getPurchaseProducts = async (purchase: string): Promise<IListProduct> => {
+const getPurchaseProducts = async (
+  purchase: string | undefined,
+): Promise<IListProduct> => {
   try {
     const productSnapshot = await getDocs(
       query(productDB, where('purchase', '==', purchase)),

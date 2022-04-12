@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useCallback} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {Facebook} from '@mui/icons-material';
 import {Box, Button, Stack, Typography, useMediaQuery} from '@mui/material';
@@ -10,6 +11,16 @@ export const Login: React.FC = () => {
   const {signIn} = useAuth();
 
   const matches = useMediaQuery('(min-width:769px)');
+  const navigate = useNavigate();
+
+  const handleSignIn = useCallback(
+    (type: string) => {
+      signIn(type);
+
+      navigate('/');
+    },
+    [signIn, navigate],
+  );
 
   return (
     <Box
@@ -27,7 +38,7 @@ export const Login: React.FC = () => {
       <Stack component="form" noValidate gap={2} mt={5}>
         <Button
           variant="contained"
-          onClick={() => signIn('google')}
+          onClick={() => handleSignIn('google')}
           style={{backgroundColor: 'white', color: 'black'}}>
           <Box display="flex" alignItems="center" gap={1}>
             <img src={google} width={32} />
@@ -37,7 +48,7 @@ export const Login: React.FC = () => {
 
         <Button
           variant="contained"
-          onClick={() => signIn('facebook')}
+          onClick={() => handleSignIn('facebook')}
           style={{backgroundColor: '#5070a8', color: 'black'}}>
           <Box display="flex" alignItems="center" gap={1}>
             <Facebook htmlColor="whitesmoke" sx={{height: 32, width: 32}} />

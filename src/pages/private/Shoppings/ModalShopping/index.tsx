@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 
 import {Grid, useMediaQuery} from '@mui/material';
 import {FormHandles} from '@unform/core';
@@ -20,11 +20,14 @@ export const ModalShopping: React.FC<IProps> = ({
   onClose,
   initialData,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const formRef = useRef<FormHandles>(null);
   const matches = useMediaQuery('(min-width:769px)');
 
   const handleOnSubmit = useCallback(
     async (data) => {
+      setIsLoading(true);
       try {
         formRef.current?.setErrors({});
 
@@ -48,6 +51,8 @@ export const ModalShopping: React.FC<IProps> = ({
           const errors = getValidationErrors(err as Yup.ValidationError);
           formRef.current?.setErrors(errors);
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     [initialData, onClick],
@@ -62,6 +67,7 @@ export const ModalShopping: React.FC<IProps> = ({
       opened={openModal}
       onClick={handleClick}
       onClose={onClose}
+      loading={isLoading}
       title={initialData ? 'Editar shopping' : 'Adicionar novo shopping'}
       labelCloseButton="Fechar"
       labelSaveButton="Salvar">

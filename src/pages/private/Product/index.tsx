@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useQuery, useQueryClient, useMutation} from 'react-query';
-import {Link as RouteLink} from 'react-router-dom';
+import {Link as RouteLink, useSearchParams} from 'react-router-dom';
 
 import {AddRounded, SellRounded} from '@mui/icons-material';
 import {
@@ -33,12 +33,14 @@ import {useAuth, useTitle} from 'shared/hooks';
 import {feedback} from 'shared/services/alertService';
 import {IProduct, productService} from 'shared/services/api/product';
 import {providerService} from 'shared/services/api/provider';
+import {purchaseService} from 'shared/services/api/purchases';
 import {sellerService} from 'shared/services/api/seller';
 
 export const Product: React.FC = () => {
   const [seller, setSeller] = useState('');
-  const [sellerTransfer, setSellerTransfer] = useState('');
+  const [purchase, setPurchase] = useState('');
   const [provider, setProvider] = useState('');
+  const [sellerTransfer, setSellerTransfer] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [filter, setFilter] = useState('');
   const [productId, setProductId] = useState('');
@@ -50,6 +52,14 @@ export const Product: React.FC = () => {
   const queryClient = useQueryClient();
   const {isAdmin} = useAuth();
   const {setTitle} = useTitle();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (code) setFilter(code);
+    const compra = searchParams.get('compra');
+    if (compra) setPurchase(compra);
+  }, [searchParams]);
 
   useEffect(() => {
     setTitle('Produtos');
@@ -59,11 +69,11 @@ export const Product: React.FC = () => {
     productService.getProducts(),
   );
 
-  const {data: sellers} = useQuery('sellers', () => sellerService.getSellers());
+  const {data: sellers} = useQuery('sellers', sellerService.getSellers);
 
-  const {data: providers} = useQuery('providers', () =>
-    providerService.getProviders(),
-  );
+  const {data: providers} = useQuery('providers', providerService.getProviders);
+
+  const {data: purchases} = useQuery('purchases', purchaseService.getPurchases);
 
   const mutationUpdate = useMutation(
     (sold: boolean) => productService.changeSoldProduct(productId, sold),
@@ -104,12 +114,33 @@ export const Product: React.FC = () => {
         item.size.toLowerCase().includes(filter.toLowerCase()) ||
         item.code.toLowerCase().includes(filter.toLowerCase());
 
+      if (seller && seller !== 'none' && provider && purchase) {
+        return data?.products.filter(
+          (item) =>
+            itemFiltered(item) &&
+            item.seller?.id === seller &&
+            item.provider.id === provider &&
+            item.purchase === purchase,
+        );
+      }
+
       if (seller && seller !== 'none' && provider) {
         return data?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === seller &&
             item.provider.id === provider,
+        );
+      }
+
+      if (seller === 'none' && provider && purchase) {
+        return data?.products.filter(
+          (item) =>
+            itemFiltered(item) &&
+            item.seller?.id === '' &&
+            item.provider.id === provider &&
+            itemFiltered(item) &&
+            item.purchase === purchase,
         );
       }
 
@@ -122,9 +153,29 @@ export const Product: React.FC = () => {
         );
       }
 
+      if (seller === 'none' && purchase) {
+        return data?.products.filter(
+          (item) =>
+            itemFiltered(item) &&
+            item.seller?.id === '' &&
+            itemFiltered(item) &&
+            item.purchase === purchase,
+        );
+      }
+
       if (seller === 'none') {
         return data?.products.filter(
           (item) => itemFiltered(item) && item.seller?.id === '',
+        );
+      }
+
+      if (seller && purchase) {
+        return data?.products.filter(
+          (item) =>
+            itemFiltered(item) &&
+            item.seller?.id === seller &&
+            itemFiltered(item) &&
+            item.purchase === purchase,
         );
       }
 
@@ -134,21 +185,38 @@ export const Product: React.FC = () => {
         );
       }
 
+      if (provider && purchase) {
+        return data?.products.filter(
+          (item) =>
+            itemFiltered(item) &&
+            item.provider.id === provider &&
+            itemFiltered(item) &&
+            item.purchase === purchase,
+        );
+      }
+
       if (provider) {
         return data?.products.filter(
           (item) => itemFiltered(item) && item.provider.id === provider,
         );
       }
 
+      if (purchase) {
+        return data?.products.filter(
+          (item) => itemFiltered(item) && item.purchase === purchase,
+        );
+      }
+
       return data?.products.filter((item) => itemFiltered(item));
     }
     return [];
-  }, [data, filter, provider, seller]);
+  }, [data?.products, filter, provider, purchase, seller]);
 
   const handleResetFilter = useCallback(() => {
     setFilter('');
     setSeller('');
     setProvider('');
+    setPurchase('');
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -234,9 +302,9 @@ export const Product: React.FC = () => {
         <Grid item xs={12}>
           <FilterData>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={isAdmin ? 3 : 6}>
                 <InputSearch
-                  placeholder="Pesquisar por código, tamanho ou descrição..."
+                  placeholder="Código, tamanho ou descrição..."
                   value={filter}
                   onChange={({target}) => setFilter(target.value)}
                 />
@@ -264,7 +332,7 @@ export const Product: React.FC = () => {
                 </Grid>
               )}
 
-              <Grid item xs={12} sm={isAdmin ? 3 : 6}>
+              <Grid item xs={12} sm={3}>
                 <FormControl variant="outlined" fullWidth>
                   <InputLabel id="provider">Fábricas</InputLabel>
                   <Select
@@ -275,6 +343,25 @@ export const Product: React.FC = () => {
                     onChange={({target}) => setProvider(target.value)}>
                     <MenuItem value="">Todas</MenuItem>
                     {providers?.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={3}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel id="provider">Compra</InputLabel>
+                  <Select
+                    label="Compra"
+                    id="provider"
+                    labelId="provider"
+                    value={purchase || ''}
+                    onChange={({target}) => setPurchase(target.value)}>
+                    <MenuItem value="">Todas</MenuItem>
+                    {purchases?.map((item) => (
                       <MenuItem key={item.id} value={item.id}>
                         {item.name}
                       </MenuItem>

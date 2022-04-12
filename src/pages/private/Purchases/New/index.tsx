@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {AddRounded, DeleteRounded, EditRounded} from '@mui/icons-material';
 import {
@@ -37,7 +37,8 @@ import * as Yup from 'yup';
 
 import {ModalProduct} from '../ModalProduct';
 
-const PurchaseDetail: React.FC = () => {
+const PurchaseNew: React.FC = () => {
+  const [idPurchase, setIdPurchase] = useState('');
   const [product, setProduct] = useState<IProduct | undefined>();
   const [productId, setProductId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,23 +46,24 @@ const PurchaseDetail: React.FC = () => {
   const [openModalConfirmExclude, setOpenModalConfirmExclude] = useState(false);
 
   const formRef = useRef<FormHandles>(null);
-  const {id} = useParams<{id: string}>();
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
   const {setTitle} = useTitle();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    purchaseService.createPurchase().then((response) => {
+      setIdPurchase(response);
+    });
+  }, []);
 
   const {data: purchaseTypes} = useQuery('purchaseTypes', () =>
     purchaseService.getPurchaseTypes(),
   );
 
   const {data: productData, isLoading: isLoadingPD} = useQuery(
-    'purchaseProducts',
-    () => purchaseService.getPurchaseProducts(id),
-  );
-
-  const {data: purchase, isLoading} = useQuery('purchase', () =>
-    purchaseService.getPurchase(id),
+    ['purchaseProducts', idPurchase],
+    () => purchaseService.getPurchaseProducts(idPurchase),
   );
 
   const mutationDelete = useMutation(
@@ -83,12 +85,12 @@ const PurchaseDetail: React.FC = () => {
   );
 
   const updatePurchase = useMutation((data: ICreatePurchase) =>
-    purchaseService.updatePurchase(id, data),
+    purchaseService.updatePurchase(idPurchase, data),
   );
 
   useEffect(() => {
-    setTitle('Visualizar | Editar compra');
-  }, [id, setTitle]);
+    setTitle('Nova compra');
+  }, [setTitle]);
 
   const handleClickModal = useCallback(async () => {
     setOpenModal(false);
@@ -108,12 +110,12 @@ const PurchaseDetail: React.FC = () => {
 
   const handleCancelPurchase = useCallback(async () => {
     await purchaseService.deletePurchase(
-      id,
+      idPurchase,
       productData?.products?.map((product) => product.id),
     );
 
     navigate('/compras');
-  }, [id, navigate, productData]);
+  }, [idPurchase, navigate, productData]);
 
   const handleEditModal = useCallback((row: IProduct) => {
     setProduct(row);
@@ -163,7 +165,7 @@ const PurchaseDetail: React.FC = () => {
     ],
   );
 
-  if (isLoadingPD || isLoading) {
+  if (isLoadingPD) {
     return <LinearDeterminate />;
   }
 
@@ -171,15 +173,12 @@ const PurchaseDetail: React.FC = () => {
     <>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6}>
-          <Title title={!id ? 'Nova compra' : 'Visualizar | Editar compra'} />
+          <Title title="Nova compra" />
         </Grid>
 
         <Grid item xs={12}>
           <Box component={Paper} variant="outlined" p={3}>
-            <Form
-              ref={formRef}
-              onSubmit={handleOnSubmit}
-              initialData={purchase}>
+            <Form ref={formRef} onSubmit={handleOnSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={9}>
                   <TextField name="name" label="Nome" fullWidth />
@@ -234,16 +233,14 @@ const PurchaseDetail: React.FC = () => {
 
                 <Grid item xs={12}>
                   <Stack direction="row" justifyContent="flex-end" spacing={3}>
-                    {!id && (
-                      <Button
-                        label={matches ? 'Cancelar compra' : 'Cancelar'}
-                        variant="outlined"
-                        onClick={handleCancelPurchase}
-                        disabled={loading}
-                        minWidth={matches ? 180 : undefined}
-                        fullWidth
-                      />
-                    )}
+                    <Button
+                      label={matches ? 'Cancelar compra' : 'Cancelar'}
+                      variant="outlined"
+                      onClick={handleCancelPurchase}
+                      disabled={loading}
+                      minWidth={matches ? 180 : undefined}
+                      fullWidth
+                    />
 
                     <Button
                       label={matches ? 'Salvar compra' : 'Salvar'}
@@ -377,11 +374,11 @@ const PurchaseDetail: React.FC = () => {
         openModal={openModal}
         onClick={handleClickModal}
         onClose={handleCloseModal}
-        idPurchase={id}
+        idPurchase={idPurchase}
         initialData={product}
       />
     </>
   );
 };
 
-export default PurchaseDetail;
+export default PurchaseNew;

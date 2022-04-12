@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useQuery} from 'react-query';
 
 import {Grid, MenuItem} from '@mui/material';
@@ -22,6 +22,8 @@ export const ModalProvider: React.FC<IProps> = ({
   onClose,
   initialData,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const formRef = useRef<FormHandles>(null);
 
   const {data: shoppings} = useQuery('shoppings', () =>
@@ -30,6 +32,7 @@ export const ModalProvider: React.FC<IProps> = ({
 
   const handleOnSubmit = useCallback(
     async (data) => {
+      setIsLoading(true);
       try {
         formRef.current?.setErrors({});
 
@@ -37,7 +40,7 @@ export const ModalProvider: React.FC<IProps> = ({
           name: Yup.string().required(),
           shopping: Yup.string().required(),
           phone: Yup.string().required(),
-          sellerProvider: Yup.string().required().email(),
+          sellerProvider: Yup.string(),
         });
 
         await schema.validate(data, {
@@ -54,6 +57,8 @@ export const ModalProvider: React.FC<IProps> = ({
           const errors = getValidationErrors(err as Yup.ValidationError);
           formRef.current?.setErrors(errors);
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     [initialData, onClick],
@@ -68,10 +73,14 @@ export const ModalProvider: React.FC<IProps> = ({
       opened={openModal}
       onClick={handleClick}
       onClose={onClose}
+      loading={isLoading}
       title={initialData ? 'Editar shopping' : 'Adicionar novo shopping'}
       labelCloseButton="Fechar"
       labelSaveButton="Salvar">
-      <Form ref={formRef} onSubmit={handleOnSubmit} initialData={initialData}>
+      <Form
+        ref={formRef}
+        onSubmit={handleOnSubmit}
+        initialData={{...initialData, shopping: initialData?.shopping.id}}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TextField name="name" label="Nome da loja" />

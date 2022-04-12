@@ -57,8 +57,8 @@ const signIn = async (type: string): Promise<IUser | null> => {
     const authUser: User = resUser.user;
     const user = await getUser(authUser.uid);
 
-    if (!!authUser.uid && !user.id) {
-      await userService.createUserByGoogle({
+    if (user === undefined) {
+      await userService.createUserByLogin({
         id: authUser.uid,
         name: authUser.displayName || '',
         email: authUser.email || '',
@@ -72,9 +72,14 @@ const signIn = async (type: string): Promise<IUser | null> => {
       await notificationService.createNotification({
         title: 'Novo usuário',
         body: `Usuário ${authUser.displayName} criado e esperando aprovação`,
-        link: `/users/profile/${authUser.uid}`,
+        link: '/usuarios',
         icon: 'add_alert',
+        isAdmin: true,
       });
+
+      const newUser = await getUser(authUser.uid);
+
+      return newUser;
     }
 
     return user;
