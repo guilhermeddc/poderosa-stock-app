@@ -20,6 +20,7 @@ const Purchases = lazy(() => import('pages/private/Purchases'));
 const PurchaseDetail = lazy(() => import('pages/private/Purchases/Detail'));
 const PurchaseNew = lazy(() => import('pages/private/Purchases/New'));
 const Shoppings = lazy(() => import('pages/private/Shoppings'));
+const Movements = lazy(() => import('pages/private/Movements'));
 
 export const PrivateRoutes: React.FC = () => {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export const PrivateRoutes: React.FC = () => {
           <Route path="compras/nova" element={<PurchaseNew />} />
           <Route path="compras/editar/:id" element={<PurchaseDetail />} />
           <Route path="shopping" element={<Shoppings />} />
+          <Route path="movimentos" element={<Movements />} />
 
           <Route path="*" element={() => <Navigate to="/" replace />} />
         </Routes>

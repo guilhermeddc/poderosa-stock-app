@@ -29,12 +29,12 @@ export const adminMenu = [
   //   icon: 'sell',
   //   path: '/vendas',
   // },
-  // {
-  //   id: 'movements',
-  //   label: 'Movimentos',
-  //   icon: 'currency_exchange',
-  //   path: '/movimentos',
-  // },
+  {
+    id: 'movements',
+    label: 'Movimentos',
+    icon: 'currency_exchange',
+    path: '/movimentos',
+  },
   {
     id: 'providers',
     label: 'Fornecedores',

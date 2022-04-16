@@ -10,7 +10,8 @@ type TVTextFieldProps = Omit<NumberFormatProps, 'value'> &
     isLoading?: boolean | undefined;
     skeletonWidth?: number | undefined;
     skeletonHeight?: number | undefined;
-
+    auxValue?: number;
+    setAuxValue?: (value: number) => void;
     onValueChange?: (value: string) => void;
   };
 /**
@@ -25,10 +26,16 @@ export const NumberFormat: React.FC<TVTextFieldProps> = ({
   skeletonWidth,
   skeletonHeight = 70,
   onValueChange,
+  auxValue,
+  setAuxValue,
   ...rest
 }) => {
   const {fieldName, defaultValue, registerField, error} = useField(name);
   const [value, setValue] = useState<string>(defaultValue);
+
+  useEffect(() => {
+    auxValue && setValue(auxValue.toString());
+  }, [auxValue]);
 
   useEffect(() => {
     registerField({
@@ -40,6 +47,7 @@ export const NumberFormat: React.FC<TVTextFieldProps> = ({
 
   const handleChange = (value: string) => {
     setValue(value);
+    setAuxValue && setAuxValue(Number(value));
     onValueChange && onValueChange(value);
   };
 

@@ -13,6 +13,8 @@ type TVTextFieldProps = Omit<TextFieldProps, 'value'> & {
   isLoading?: boolean | undefined;
   skeletonWidth?: number | undefined;
   skeletonHeight?: number | undefined;
+  auxValue?: string | number | Date;
+  setAuxValue?: (value: string | number | Date) => void;
 };
 export const TextField: React.FC<TVTextFieldProps> = ({
   name,
@@ -20,11 +22,17 @@ export const TextField: React.FC<TVTextFieldProps> = ({
   isLoading,
   skeletonWidth,
   skeletonHeight = 70,
+  auxValue,
+  setAuxValue,
   onChange,
   ...rest
 }) => {
   const {fieldName, defaultValue, registerField, error} = useField(name);
   const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    auxValue && setValue(auxValue);
+  }, [auxValue]);
 
   useEffect(() => {
     registerField({
@@ -39,6 +47,7 @@ export const TextField: React.FC<TVTextFieldProps> = ({
     value: string,
   ) => {
     setValue(value);
+    setAuxValue && setAuxValue(value);
     onChange && onChange(event);
   };
 

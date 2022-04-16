@@ -17,6 +17,8 @@ type TVSelectProps = Omit<SelectProps, 'value'> & {
   isLoading?: boolean;
   skeletonWidth?: number;
   skeletonHeight?: number;
+  auxValue?: string;
+  setAuxValue?: (value: string) => void;
 };
 export const Select: React.FC<TVSelectProps> = ({
   name,
@@ -27,12 +29,18 @@ export const Select: React.FC<TVSelectProps> = ({
   skeletonHeight = 70,
   onChange,
   children,
+  auxValue,
+  setAuxValue,
   ...rest
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const {fieldName, defaultValue, registerField, error} = useField(name);
 
   const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    auxValue && setValue(auxValue);
+  }, [auxValue]);
 
   useEffect(() => {
     registerField({
@@ -45,6 +53,7 @@ export const Select: React.FC<TVSelectProps> = ({
 
   const handleChange = (e: any, node: any) => {
     setValue(e.target.value);
+    setAuxValue && setAuxValue(e.target.value);
     onChange && onChange(e, node);
   };
 
