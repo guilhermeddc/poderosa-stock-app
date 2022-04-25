@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useQuery, useQueryClient, useMutation} from 'react-query';
 import {Link as RouteLink, useSearchParams} from 'react-router-dom';
 
-import {AddRounded, SellRounded} from '@mui/icons-material';
+import {AddRounded, ImageRounded, SellRounded} from '@mui/icons-material';
 import {
   Grid,
   MenuItem,
@@ -36,6 +36,8 @@ import {providerService} from 'shared/services/api/provider';
 import {purchaseService} from 'shared/services/api/purchases';
 import {sellerService} from 'shared/services/api/seller';
 
+import {ModalImage} from './ModalImage';
+
 export const Product: React.FC = () => {
   const [seller, setSeller] = useState('');
   const [purchase, setPurchase] = useState('');
@@ -47,6 +49,7 @@ export const Product: React.FC = () => {
   const [productIds, setProductIds] = useState<GridSelectionModel>([]);
   const [productSold, setProductSold] = useState(false);
   const [openModalConfirmSold, setOpenModalConfirmSold] = useState(false);
+  const [openModalImage, setOpenModalImage] = useState(false);
 
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
@@ -224,6 +227,7 @@ export const Product: React.FC = () => {
 
     setOpenModal(false);
     setOpenModalConfirmSold(false);
+    setOpenModalImage(false);
   }, []);
 
   const handleSold = useCallback((id: string, sold: boolean) => {
@@ -231,6 +235,12 @@ export const Product: React.FC = () => {
 
     setProductId(id);
     setProductSold(sold);
+  }, []);
+
+  const handleImage = useCallback((id: string) => {
+    setOpenModalImage(true);
+
+    setProductId(id);
   }, []);
 
   if (isLoading) {
@@ -417,21 +427,38 @@ export const Product: React.FC = () => {
                 disableExport: true,
                 sortable: false,
                 renderCell: (params) => (
-                  <Tooltip
-                    title={
-                      params.row.sold
-                        ? 'Retificar venda'
-                        : 'Marcar como vendido'
-                    }>
-                    <IconButton
-                      onClick={() =>
-                        handleSold(params.row.id, params.row.sold)
+                  <>
+                    <Tooltip
+                      title={
+                        params.row.sold
+                          ? 'Retificar venda'
+                          : 'Marcar como vendido'
                       }>
-                      <SellRounded
-                        color={params.row.sold ? 'success' : 'secondary'}
-                      />
-                    </IconButton>
-                  </Tooltip>
+                      <IconButton
+                        onClick={() =>
+                          handleSold(params.row.id, params.row.sold)
+                        }>
+                        <SellRounded
+                          color={params.row.sold ? 'success' : 'secondary'}
+                        />
+                      </IconButton>
+                    </Tooltip>
+
+                    {isAdmin && (
+                      <Tooltip
+                        title={
+                          params.row.image
+                            ? 'Trocar imagem'
+                            : 'Adicionar imagem'
+                        }>
+                        <IconButton onClick={() => handleImage(params.row.id)}>
+                          <ImageRounded
+                            color={params.row.image ? 'success' : 'info'}
+                          />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </>
                 ),
               },
               {
@@ -551,6 +578,12 @@ export const Product: React.FC = () => {
           </Select>
         </FormControl>
       </Modal>
+
+      <ModalImage
+        openModal={openModalImage}
+        onClose={handleCloseModal}
+        id={productId}
+      />
     </>
   );
 };

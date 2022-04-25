@@ -9,8 +9,9 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
+import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
 import {IRequestResult} from 'shared/interfaces';
-import {productDB} from 'shared/services/firebase';
+import {productDB, storage} from 'shared/services/firebase';
 
 import {notificationService} from './notifications';
 import {IProvider, providerService} from './provider';
@@ -210,6 +211,24 @@ const updateProduct = async (
   }
 };
 
+const updateImageProduct = async (id: string, file: File) => {
+  try {
+    const storageRef = ref(storage, `products/${id}`);
+
+    await uploadBytes(storageRef, file);
+
+    const downloadURL = await getDownloadURL(storageRef);
+
+    await updateDoc(doc(productDB, id), {
+      image: downloadURL,
+    });
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
 const changeSoldProduct = async (
   id: string,
   sold: boolean,
@@ -264,4 +283,5 @@ export const productService = {
   updateProduct,
   transferProducts,
   changeSoldProduct,
+  updateImageProduct,
 };

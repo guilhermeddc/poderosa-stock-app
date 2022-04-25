@@ -1,5 +1,5 @@
 import React, {Fragment, useCallback, useRef, useState} from 'react';
-import {useQuery} from 'react-query';
+import {useQuery, useQueryClient} from 'react-query';
 
 import {Divider, Grid, MenuItem, Typography} from '@mui/material';
 import {FormHandles} from '@unform/core';
@@ -25,12 +25,14 @@ export const ModalMovement: React.FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [auxMovement, setAuxMovement] = useState({
+    movement: 'purchase',
     dividedIn: 1,
     type: '',
     amount: 0,
   });
 
   const formRef = useRef<FormHandles>(null);
+  const queryClient = useQueryClient();
 
   const {data: movementTypes} = useQuery('movementTypes', () =>
     movementsService.getMovementTypes(),
@@ -46,20 +48,16 @@ export const ModalMovement: React.FC<IProps> = ({
       try {
         formRef.current?.setErrors({});
 
-        const schema = Yup.object().shape({});
-
-        await schema.validate(data, {
-          abortEarly: false,
-        });
-
         const auxInstallments = [];
 
-        for (let i = 0; i < auxMovement.dividedIn; i++) {
-          auxInstallments.push({
-            amount: Number(data.installments[i].amount),
-            date: data.installments[i].date,
-            number: data.installments[i].number,
-          });
+        if (data.installments && data.installments.length > 0) {
+          for (let i = 0; i < auxMovement.dividedIn; i++) {
+            auxInstallments.push({
+              amount: Number(data.installments[i].amount),
+              date: data.installments[i].date,
+              number: data.installments[i].number,
+            });
+          }
         }
 
         const ajusteData: IMovement = {
@@ -67,11 +65,14 @@ export const ModalMovement: React.FC<IProps> = ({
           type: data.type,
           amount: Number(data.amount),
           dividedIn: data.dividedIn,
-          provider: data.provider || null,
-          installments: auxInstallments,
+          provider: data.provider || '',
+          date: data.date || '',
+          installments: auxInstallments || [],
         };
 
         await movementsService.createMovement(ajusteData);
+
+        queryClient.invalidateQueries('movements');
 
         onClose();
       } catch (err) {
@@ -83,7 +84,7 @@ export const ModalMovement: React.FC<IProps> = ({
         setIsLoading(false);
       }
     },
-    [auxMovement.dividedIn, onClose],
+    [auxMovement.dividedIn, onClose, queryClient],
   );
 
   const handleClick = useCallback(() => {
@@ -102,7 +103,19 @@ export const ModalMovement: React.FC<IProps> = ({
       <Form ref={formRef} onSubmit={handleOnSubmit} initialData={initialData}>
         <Grid container spacing={3}>
           <Grid item xs={6}>
-            <Select name="movement" label="Movimentação">
+            <Select
+              name="movement"
+              label="Movimentação"
+              auxValue={auxMovement.movement}
+              setAuxValue={(value) =>
+                setAuxMovement(
+                  (state) =>
+                    (state = {
+                      ...state,
+                      movement: value,
+                    }),
+                )
+              }>
               <MenuItem value="">Selecione</MenuItem>
               <MenuItem value="sale">Entrada</MenuItem>
               <MenuItem value="purchase">Saída</MenuItem>
@@ -125,18 +138,20 @@ export const ModalMovement: React.FC<IProps> = ({
             </Select>
           </Grid>
 
-          <Grid item xs={5}>
-            <Select name="provider" label="Loja">
-              <MenuItem value="">Selecione</MenuItem>
-              {providers?.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Grid>
+          {auxMovement.movement === 'purchase' && (
+            <Grid item xs={5}>
+              <Select name="provider" label="Loja">
+                <MenuItem value="">Selecione</MenuItem>
+                {providers?.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Grid>
+          )}
 
-          <Grid item xs={12} sm={5}>
+          <Grid item xs={12} sm={auxMovement.movement === 'purchase' ? 5 : 6}>
             <NumberFormat
               name="amount"
               label="Valor total"
@@ -146,57 +161,78 @@ export const ModalMovement: React.FC<IProps> = ({
             />
           </Grid>
 
-          <Grid item xs={2}>
-            <TextField
-              name="dividedIn"
-              label="Dividido em"
-              type="number"
-              auxValue={auxMovement.dividedIn}
-              setAuxValue={(value) =>
-                setAuxMovement(
-                  (state) => (state = {...state, dividedIn: Number(value)}),
-                )
-              }
-            />
-          </Grid>
+          {auxMovement.movement === 'sale' && (
+            <Grid item xs={6}>
+              <TextField
+                name="date"
+                label="Data"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+          )}
 
-          <Grid item xs={12}>
-            <Divider />
-          </Grid>
+          {auxMovement.movement === 'purchase' && (
+            <Grid item xs={2}>
+              <TextField
+                name="dividedIn"
+                label="Dividido em"
+                type="number"
+                auxValue={auxMovement.dividedIn}
+                setAuxValue={(value) =>
+                  setAuxMovement(
+                    (state) => (state = {...state, dividedIn: Number(value)}),
+                  )
+                }
+              />
+            </Grid>
+          )}
 
-          <Grid item xs={12}>
-            <Typography>Parcelas</Typography>
-          </Grid>
-
-          {Array.from(Array(auxMovement.dividedIn).keys()).map((_, index) => (
-            <Fragment key={index}>
-              <Grid item xs={4}>
-                <TextField
-                  name={`installments[${index}].number`}
-                  label="Cheque Nº"
-                />
+          {auxMovement.movement === 'purchase' && (
+            <>
+              <Grid item xs={12}>
+                <Divider />
               </Grid>
 
-              <Grid item xs={4}>
-                <TextField
-                  name={`installments[${index}].date`}
-                  label="Data"
-                  type="date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
+              <Grid item xs={12}>
+                <Typography>Parcelas</Typography>
               </Grid>
 
-              <Grid item xs={4}>
-                <NumberFormat
-                  name={`installments[${index}].amount`}
-                  label="Valor"
-                  auxValue={auxMovement.amount / auxMovement.dividedIn}
-                />
-              </Grid>
-            </Fragment>
-          ))}
+              {Array.from(Array(auxMovement.dividedIn).keys()).map(
+                (_, index) => (
+                  <Fragment key={index}>
+                    <Grid item xs={4}>
+                      <TextField
+                        name={`installments[${index}].number`}
+                        label="Cheque Nº"
+                      />
+                    </Grid>
+
+                    <Grid item xs={4}>
+                      <TextField
+                        name={`installments[${index}].date`}
+                        label="Data"
+                        type="date"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={4}>
+                      <NumberFormat
+                        name={`installments[${index}].amount`}
+                        label="Valor"
+                        auxValue={auxMovement.amount / auxMovement.dividedIn}
+                      />
+                    </Grid>
+                  </Fragment>
+                ),
+              )}
+            </>
+          )}
         </Grid>
       </Form>
     </Modal>
