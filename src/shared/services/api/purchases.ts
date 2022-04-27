@@ -207,8 +207,18 @@ const getPurchaseProducts = async (
       query(productDB, where('purchase', '==', purchase)),
     );
 
+    let totalSaleValue = 0;
+    let totalProfitValue = 0;
+    let totalQuantity = 0;
+    let totalPurchaseValue = 0;
+
     const products = await Promise.all(
       productSnapshot.docs.map(async (data) => {
+        totalSaleValue += data.data().saleValue;
+        totalProfitValue += data.data().profitValue;
+        totalQuantity += Number(data.data().quantity);
+        totalPurchaseValue += data.data().purchaseValue;
+
         return {
           ...data.data(),
           id: data.id,
@@ -216,18 +226,6 @@ const getPurchaseProducts = async (
         };
       }) as Promise<IProduct>[],
     );
-
-    let totalSaleValue = 0;
-    let totalProfitValue = 0;
-    let totalQuantity = 0;
-    let totalPurchaseValue = 0;
-
-    products.forEach((product) => {
-      totalSaleValue += product.saleValue;
-      totalProfitValue += product.profitValue;
-      totalQuantity += Number(product.quantity);
-      totalPurchaseValue += product.purchaseValue;
-    });
 
     return {
       products,

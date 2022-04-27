@@ -65,7 +65,7 @@ export const ModalImage: React.FC<IProps> = ({openModal, onClose, id}) => {
       onClick={handleSubmit}
       onClose={handleClose}
       loading={isLoading}
-      labelSaveButton="Adicionar imagem"
+      labelSaveButton="Adicionar"
       labelCloseButton="Cancelar"
       title="Imagem do produto">
       <label htmlFor="image_list">
@@ -74,7 +74,7 @@ export const ModalImage: React.FC<IProps> = ({openModal, onClose, id}) => {
             <Stack
               title="Trocar de foto"
               width="100%"
-              height={600}
+              height={{md: 600, xs: 400}}
               style={{
                 backgroundImage: `url(${preview})`,
                 backgroundPosition: 'center',
@@ -87,7 +87,7 @@ export const ModalImage: React.FC<IProps> = ({openModal, onClose, id}) => {
             <Stack
               title="Adicionar foto"
               width="100%"
-              height={600}
+              height={{md: 600, xs: 400}}
               display="flex"
               flex={1}
               justifyContent="center"
@@ -95,7 +95,7 @@ export const ModalImage: React.FC<IProps> = ({openModal, onClose, id}) => {
               style={{
                 cursor: 'pointer',
               }}>
-              <AddAPhotoRounded fontSize="large" color="secondary" />
+              <AddAPhotoRounded fontSize="large" color="primary" />
             </Stack>
           )}
         </Card>

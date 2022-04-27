@@ -11,7 +11,7 @@ import {
 } from 'firebase/firestore';
 import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
 import {IRequestResult} from 'shared/interfaces';
-import {productDB, storage} from 'shared/services/firebase';
+import {productDB, productTypeDB, storage} from 'shared/services/firebase';
 
 import {notificationService} from './notifications';
 import {IProvider, providerService} from './provider';
@@ -62,8 +62,25 @@ export interface IListProduct {
 const getProducts = async (): Promise<IListProduct> => {
   try {
     const productSnapshot = await getDocs(productDB);
+
+    let totalSaleValue = 0;
+    let totalSaleValueSold = 0;
+    let totalProfitValue = 0;
+    let totalQuantity = 0;
+    let totalPurchaseValue = 0;
+    let totalQuantitySold = 0;
+
     const products = await Promise.all(
       productSnapshot.docs.map(async (data) => {
+        totalSaleValue += data.data().saleValue;
+        totalProfitValue += data.data().profitValue;
+        totalQuantity += Number(data.data().quantity);
+        totalPurchaseValue += data.data().purchaseValue;
+        if (data.data().sold) {
+          totalQuantitySold += Number(data.data().quantity);
+          totalSaleValueSold += data.data().saleValue;
+        }
+
         return {
           ...data.data(),
           id: data.id,
@@ -74,24 +91,6 @@ const getProducts = async (): Promise<IListProduct> => {
         };
       }) as Promise<IProduct>[],
     );
-
-    let totalSaleValue = 0;
-    let totalSaleValueSold = 0;
-    let totalProfitValue = 0;
-    let totalQuantity = 0;
-    let totalPurchaseValue = 0;
-    let totalQuantitySold = 0;
-
-    products.forEach((product) => {
-      totalSaleValue += product.saleValue;
-      totalProfitValue += product.profitValue;
-      totalQuantity += Number(product.quantity);
-      totalPurchaseValue += product.purchaseValue;
-      if (product.sold) {
-        totalQuantitySold += Number(product.quantity);
-        totalSaleValueSold += product.saleValue;
-      }
-    });
 
     return {
       products,
@@ -104,6 +103,29 @@ const getProducts = async (): Promise<IListProduct> => {
       totalQuantityInStock: totalQuantity - totalQuantitySold,
       totalPurchaseValue,
     };
+  } catch (error: any) {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    throw new Error(`${errorCode} ${errorMessage}`);
+  }
+};
+
+export interface IProductTypes {
+  id: string;
+  name: string;
+}
+
+const getProductTypes = async (): Promise<IProductTypes[]> => {
+  try {
+    const productTypeSnapshot = await getDocs(productTypeDB);
+    const productTypeList = productTypeSnapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        name: doc.data().name,
+      };
+    });
+
+    return productTypeList;
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
@@ -284,4 +306,5 @@ export const productService = {
   transferProducts,
   changeSoldProduct,
   updateImageProduct,
+  getProductTypes,
 };

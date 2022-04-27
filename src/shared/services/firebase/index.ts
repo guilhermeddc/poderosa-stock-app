@@ -22,6 +22,7 @@ export const notificationDB = collection(db, 'notifications');
 export const userTypeDB = collection(db, 'userType');
 export const userDB = collection(db, 'users');
 export const productDB = collection(db, 'products');
+export const productTypeDB = collection(db, 'productTypes');
 export const providerDB = collection(db, 'providers');
 export const adminDB = collection(db, 'admins');
 export const purchaseDB = collection(db, 'purchases');

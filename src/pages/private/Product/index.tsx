@@ -53,7 +53,7 @@ export const Product: React.FC = () => {
 
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
-  const {isAdmin} = useAuth();
+  const {isAdmin, user} = useAuth();
   const {setTitle} = useTitle();
   const [searchParams] = useSearchParams();
 
@@ -68,8 +68,18 @@ export const Product: React.FC = () => {
     setTitle('Produtos');
   }, [setTitle]);
 
-  const {data, isLoading} = useQuery('products', () =>
-    productService.getProducts(),
+  const {data, isLoading} = useQuery(
+    ['products', isAdmin],
+    productService.getProducts,
+    {
+      enabled: isAdmin,
+    },
+  );
+
+  const {data: sellerProducts, isLoading: isLoadingSellers} = useQuery(
+    ['sellerProducts', isAdmin, user.id],
+    () => sellerService.getSellerProducts(user.id),
+    {enabled: !isAdmin},
   );
 
   const {data: sellers} = useQuery('sellers', sellerService.getSellers);
@@ -111,14 +121,14 @@ export const Product: React.FC = () => {
   );
 
   const filteredData = useMemo(() => {
-    if (data?.products) {
+    if (data?.products || sellerProducts?.products) {
       const itemFiltered = (item: IProduct) =>
         item.description.toLowerCase().includes(filter.toLowerCase()) ||
         item.size.toLowerCase().includes(filter.toLowerCase()) ||
         item.code.toLowerCase().includes(filter.toLowerCase());
 
       if (seller && seller !== 'none' && provider && purchase) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === seller &&
@@ -128,7 +138,7 @@ export const Product: React.FC = () => {
       }
 
       if (seller && seller !== 'none' && provider) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === seller &&
@@ -137,7 +147,7 @@ export const Product: React.FC = () => {
       }
 
       if (seller === 'none' && provider && purchase) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === '' &&
@@ -148,7 +158,7 @@ export const Product: React.FC = () => {
       }
 
       if (seller === 'none' && provider) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === '' &&
@@ -157,7 +167,7 @@ export const Product: React.FC = () => {
       }
 
       if (seller === 'none' && purchase) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === '' &&
@@ -167,13 +177,13 @@ export const Product: React.FC = () => {
       }
 
       if (seller === 'none') {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) => itemFiltered(item) && item.seller?.id === '',
         );
       }
 
       if (seller && purchase) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.seller?.id === seller &&
@@ -183,13 +193,13 @@ export const Product: React.FC = () => {
       }
 
       if (seller) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) => itemFiltered(item) && item.seller?.id === seller,
         );
       }
 
       if (provider && purchase) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) =>
             itemFiltered(item) &&
             item.provider.id === provider &&
@@ -199,21 +209,23 @@ export const Product: React.FC = () => {
       }
 
       if (provider) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) => itemFiltered(item) && item.provider.id === provider,
         );
       }
 
       if (purchase) {
-        return data?.products.filter(
+        return (isAdmin ? data : sellerProducts)?.products.filter(
           (item) => itemFiltered(item) && item.purchase === purchase,
         );
       }
 
-      return data?.products.filter((item) => itemFiltered(item));
+      return (isAdmin ? data : sellerProducts)?.products.filter((item) =>
+        itemFiltered(item),
+      );
     }
-    return [];
-  }, [data?.products, filter, provider, purchase, seller]);
+    return [] as IProduct[];
+  }, [data, filter, isAdmin, provider, purchase, seller, sellerProducts]);
 
   const handleResetFilter = useCallback(() => {
     setFilter('');
@@ -243,7 +255,7 @@ export const Product: React.FC = () => {
     setProductId(id);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || isLoadingSellers) {
     return <LinearDeterminate />;
   }
 
@@ -407,7 +419,9 @@ export const Product: React.FC = () => {
                 label="Transferir produtos"
                 startIcon={<AddRounded />}
                 onClick={() => setOpenModal(true)}
-                disabled={isLoading || productIds.length === 0}
+                disabled={
+                  isLoading || isLoadingSellers || productIds.length === 0
+                }
               />
             </Stack>
           </Grid>
@@ -532,7 +546,7 @@ export const Product: React.FC = () => {
                 minWidth: 180,
               },
             ]}
-            rows={filteredData}
+            rows={filteredData || []}
             onSelectionModelChange={(ids) => {
               setProductIds(ids);
             }}

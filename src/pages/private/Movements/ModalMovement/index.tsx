@@ -42,6 +42,17 @@ export const ModalMovement: React.FC<IProps> = ({
     providerService.getProviders(),
   );
 
+  const handleClose = useCallback(() => {
+    setAuxMovement({
+      movement: 'purchase',
+      dividedIn: 1,
+      type: '',
+      amount: 0,
+    });
+
+    onClose();
+  }, [onClose]);
+
   const handleOnSubmit = useCallback(
     async (data) => {
       setIsLoading(true);
@@ -74,7 +85,7 @@ export const ModalMovement: React.FC<IProps> = ({
 
         queryClient.invalidateQueries('movements');
 
-        onClose();
+        handleClose();
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err as Yup.ValidationError);
@@ -84,7 +95,7 @@ export const ModalMovement: React.FC<IProps> = ({
         setIsLoading(false);
       }
     },
-    [auxMovement.dividedIn, onClose, queryClient],
+    [auxMovement.dividedIn, handleClose, queryClient],
   );
 
   const handleClick = useCallback(() => {
@@ -95,7 +106,7 @@ export const ModalMovement: React.FC<IProps> = ({
     <Modal
       opened={openModal}
       onClick={handleClick}
-      onClose={onClose}
+      onClose={handleClose}
       title="Adicionar Movimento"
       loading={isLoading}
       labelCloseButton="Cancelar"
@@ -180,6 +191,12 @@ export const ModalMovement: React.FC<IProps> = ({
                 name="dividedIn"
                 label="Dividido em"
                 type="number"
+                inputProps={{
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                  min: 1,
+                  max: 12,
+                }}
                 auxValue={auxMovement.dividedIn}
                 setAuxValue={(value) =>
                   setAuxMovement(
@@ -200,37 +217,38 @@ export const ModalMovement: React.FC<IProps> = ({
                 <Typography>Parcelas</Typography>
               </Grid>
 
-              {Array.from(Array(auxMovement.dividedIn).keys()).map(
-                (_, index) => (
-                  <Fragment key={index}>
-                    <Grid item xs={4}>
-                      <TextField
-                        name={`installments[${index}].number`}
-                        label="Cheque Nº"
-                      />
-                    </Grid>
+              {auxMovement.dividedIn >= 1 &&
+                Array.from(Array(auxMovement.dividedIn).keys()).map(
+                  (_, index) => (
+                    <Fragment key={index}>
+                      <Grid item xs={4}>
+                        <TextField
+                          name={`installments[${index}].number`}
+                          label="Cheque Nº"
+                        />
+                      </Grid>
 
-                    <Grid item xs={4}>
-                      <TextField
-                        name={`installments[${index}].date`}
-                        label="Data"
-                        type="date"
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                      />
-                    </Grid>
+                      <Grid item xs={4}>
+                        <TextField
+                          name={`installments[${index}].date`}
+                          label="Data"
+                          type="date"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                        />
+                      </Grid>
 
-                    <Grid item xs={4}>
-                      <NumberFormat
-                        name={`installments[${index}].amount`}
-                        label="Valor"
-                        auxValue={auxMovement.amount / auxMovement.dividedIn}
-                      />
-                    </Grid>
-                  </Fragment>
-                ),
-              )}
+                      <Grid item xs={4}>
+                        <NumberFormat
+                          name={`installments[${index}].amount`}
+                          label="Valor"
+                          auxValue={auxMovement.amount / auxMovement.dividedIn}
+                        />
+                      </Grid>
+                    </Fragment>
+                  ),
+                )}
             </>
           )}
         </Grid>

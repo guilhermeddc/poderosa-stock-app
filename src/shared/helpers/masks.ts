@@ -16,20 +16,5 @@ export const dateMask = (str: string | undefined) =>
 export const cepMask = (str: string | undefined) =>
   str?.replace(/(\d{5})(\d{3})/, '$1-$2');
 
-export const cnpjUnmask = (str: string | undefined) =>
-  str?.replace(/[^\d]+/g, '');
-
-export const cpfUnmask = (str: string | undefined) =>
-  str?.replace(/[^\d]+/g, '');
-
-export const phoneUnmask = (str: string | undefined) =>
-  str?.replace(/[^\d]+/g, '');
-
-export const moneyUnmask = (str: string | undefined) =>
-  str?.replace(/[^\d]+/g, '');
-
-export const dateUnmask = (str: string | undefined) =>
-  str?.replace(/[^\d]+/g, '');
-
-export const cepUnmask = (str: string | undefined) =>
+export const strUnmask = (str: string | undefined) =>
   str?.replace(/[^\d]+/g, '');

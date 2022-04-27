@@ -32,6 +32,10 @@ export const ModalProduct: React.FC<IProps> = ({
     providerService.getProviders(),
   );
 
+  const {data: productTypes} = useQuery('productTypes', () =>
+    productService.getProductTypes(),
+  );
+
   const handleOnSubmit = useCallback(
     async (data) => {
       setIsLoading(true);
@@ -42,6 +46,8 @@ export const ModalProduct: React.FC<IProps> = ({
           code: Yup.string().required('Código é obrigatório'),
           description: Yup.string().required('Descrição é obrigatório'),
           size: Yup.string().required('Tamanho é obrigatório'),
+          genre: Yup.string().required('Gênero é obrigatório'),
+          productType: Yup.string().required('Categoria é obrigatório'),
           purchaseValue: Yup.number().required('Valor de compra é obrigatório'),
           saleValue: Yup.number().required('Valor de venda é obrigatório'),
           provider: Yup.string().required('Fornecedor é obrigatório'),
@@ -118,6 +124,24 @@ export const ModalProduct: React.FC<IProps> = ({
               <TextField name="quantity" label="Quantidade" type="number" />
             </Grid>
           )}
+
+          <Grid item xs={12} sm={6}>
+            <Select name="genre" label="Gênero">
+              <MenuItem value="Fem">Feminino</MenuItem>
+              <MenuItem value="Masc">Masculino</MenuItem>
+              <MenuItem value="Unisex">Unisex</MenuItem>
+            </Select>
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <Select name="productType" label="Categoria">
+              {productTypes?.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
 
           <Grid item xs={12} sm={6}>
             <TextField name="code" label="Código" />
