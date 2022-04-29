@@ -1,5 +1,6 @@
 import React, {useCallback} from 'react';
 
+import {ExpandLessRounded, ExpandMoreRounded} from '@mui/icons-material';
 import {
   Collapse,
   Divider,
@@ -9,8 +10,8 @@ import {
   useTheme,
 } from '@mui/material';
 import {IMenuOptions} from 'shared/context/Drawer';
+
 import {MuiIcon} from '../../styles';
-import {ExpandLessRounded, ExpandMoreRounded} from '@mui/icons-material';
 import {MenuItem} from '../MenuItem';
 
 interface IProps {

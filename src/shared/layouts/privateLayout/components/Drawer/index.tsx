@@ -43,7 +43,7 @@ export const Drawer: React.FC<IProps> = ({
 
   const {signOut} = useAuth();
   const theme = useTheme();
-  const matches = useMediaQuery('(min-width:769px)');
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   const filteredMenuOptions: IMenuOptions[] = useMemo(() => {
     if (menuOptions) {
@@ -88,7 +88,7 @@ export const Drawer: React.FC<IProps> = ({
                   duration: theme.transitions.duration.leavingScreen,
                 }),
             overflowX: 'hidden',
-            [theme.breakpoints.up('sm')]: {
+            [theme.breakpoints.up('md')]: {
               width: drawerOpen ? drawerWidth : theme.spacing(9),
             },
           }}

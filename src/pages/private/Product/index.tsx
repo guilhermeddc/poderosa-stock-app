@@ -268,25 +268,25 @@ export const Product: React.FC = () => {
 
         {isAdmin ? (
           <>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <DetailInfo data={data?.totalQuantity || 0} title="Quantidade" />
             </Grid>
 
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <DetailInfo
                 data={`R$ ${data?.totalPurchaseValue.toFixed(2) || 0}`}
                 title="Total de compra"
               />
             </Grid>
 
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <DetailInfo
                 data={`R$ ${data?.totalSaleValue.toFixed(2) || 0}`}
                 title="Total de venda"
               />
             </Grid>
 
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <DetailInfo
                 data={`R$ ${data?.totalProfitValue.toFixed(2) || 0}`}
                 title="Total de lucro"

@@ -28,7 +28,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
   }),
   overflowX: 'hidden',
   width: `calc(${theme.spacing(9)} + 1px)`,
-  [theme.breakpoints.only('xs')]: {
+  [theme.breakpoints.down('md')]: {
     width: 0,
   },
 });

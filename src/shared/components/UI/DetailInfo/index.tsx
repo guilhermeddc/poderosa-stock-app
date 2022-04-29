@@ -9,7 +9,7 @@ interface IProps {
 }
 
 export const DetailInfo: React.FC<IProps> = ({data, title, value}) => {
-  const matches = useMediaQuery('(min-width:769px)');
+  const matches = useMediaQuery('(min-width:900px)');
 
   return (
     <Stack
@@ -19,7 +19,10 @@ export const DetailInfo: React.FC<IProps> = ({data, title, value}) => {
       p={2}
       spacing={1}
       alignItems="stretch">
-      <Typography color="whitesmoke" variant="h4" align="center">
+      <Typography
+        color="whitesmoke"
+        variant={matches ? 'h4' : 'h6'}
+        align="center">
         {data}
       </Typography>
       {value && (

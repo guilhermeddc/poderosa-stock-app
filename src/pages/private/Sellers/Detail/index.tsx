@@ -68,28 +68,28 @@ export const Detail: React.FC = () => {
         <Divider />
       </Grid>
 
-      <Grid item xs={6} sm={3}>
+      <Grid item xs={12} sm={6} md={3}>
         <DetailInfo
           data={productsData?.totalQuantity || 0}
           title="Quantidade de produtos"
         />
       </Grid>
 
-      <Grid item xs={6} sm={3}>
+      <Grid item xs={12} sm={6} md={3}>
         <DetailInfo
           data={`R$ ${productsData?.totalPurchaseValue.toFixed(2) || 0}`}
           title="Valor total de compra"
         />
       </Grid>
 
-      <Grid item xs={6} sm={3}>
+      <Grid item xs={12} sm={6} md={3}>
         <DetailInfo
           data={`R$ ${productsData?.totalSaleValue.toFixed(2) || 0}`}
           title="Valor total de venda"
         />
       </Grid>
 
-      <Grid item xs={6} sm={3}>
+      <Grid item xs={12} sm={6} md={3}>
         <DetailInfo
           data={`R$ ${productsData?.totalProfitValue.toFixed(2) || 0}`}
           title="Valor total de lucro"
