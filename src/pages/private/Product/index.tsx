@@ -50,6 +50,7 @@ export const Product: React.FC = () => {
   const [productSold, setProductSold] = useState(false);
   const [openModalConfirmSold, setOpenModalConfirmSold] = useState(false);
   const [openModalImage, setOpenModalImage] = useState(false);
+  const [imagePrimary, setImagePrimary] = useState(false);
 
   const matches = useMediaQuery('(min-width:769px)');
   const queryClient = useQueryClient();
@@ -73,6 +74,7 @@ export const Product: React.FC = () => {
     productService.getProducts,
     {
       enabled: isAdmin,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -249,8 +251,9 @@ export const Product: React.FC = () => {
     setProductSold(sold);
   }, []);
 
-  const handleImage = useCallback((id: string) => {
+  const handleImage = useCallback((id: string, primary: boolean) => {
     setOpenModalImage(true);
+    setImagePrimary(primary);
 
     setProductId(id);
   }, []);
@@ -459,18 +462,39 @@ export const Product: React.FC = () => {
                     </Tooltip>
 
                     {isAdmin && (
-                      <Tooltip
-                        title={
-                          params.row.image
-                            ? 'Trocar imagem'
-                            : 'Adicionar imagem'
-                        }>
-                        <IconButton onClick={() => handleImage(params.row.id)}>
-                          <ImageRounded
-                            color={params.row.image ? 'success' : 'info'}
-                          />
-                        </IconButton>
-                      </Tooltip>
+                      <>
+                        <Tooltip
+                          title={
+                            params.row.image
+                              ? 'Trocar imagem principal'
+                              : 'Adicionar imagem principal'
+                          }>
+                          <IconButton
+                            onClick={() => handleImage(params.row.id, true)}>
+                            <ImageRounded
+                              color={params.row.image ? 'success' : 'disabled'}
+                            />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip
+                          title={
+                            params.row.image
+                              ? 'Trocar imagem secundaria'
+                              : 'Adicionar imagem secundaria'
+                          }>
+                          <IconButton
+                            onClick={() => handleImage(params.row.id, false)}>
+                            <ImageRounded
+                              color={
+                                params.row.secondaryImage
+                                  ? 'success'
+                                  : 'disabled'
+                              }
+                            />
+                          </IconButton>
+                        </Tooltip>
+                      </>
                     )}
                   </>
                 ),
@@ -594,6 +618,7 @@ export const Product: React.FC = () => {
       </Modal>
 
       <ModalImage
+        primary={imagePrimary}
         openModal={openModalImage}
         onClose={handleCloseModal}
         id={productId}

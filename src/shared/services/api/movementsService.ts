@@ -62,8 +62,6 @@ const createMovement = async (payload: IMovement): Promise<void> => {
   try {
     await addDoc(movementDB, payload);
   } catch (error: any) {
-    // eslint-disable-next-line
-    console.log('*** error', error);
     const errorCode = error.code;
     const errorMessage = error.message;
     throw new Error(`${errorCode} ${errorMessage}`);

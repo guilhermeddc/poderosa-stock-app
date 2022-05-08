@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useCallback, useState} from 'react';
-import {useMutation} from 'react-query';
+import {useMutation, useQueryClient} from 'react-query';
 
 import {AddAPhotoRounded} from '@mui/icons-material';
 import {Card, Stack} from '@mui/material';
@@ -9,20 +9,29 @@ import {productService} from 'shared/services/api/product';
 
 interface IProps {
   openModal: boolean;
+  primary: boolean;
   onClose(): void;
   id: string;
 }
 
-export const ModalImage: React.FC<IProps> = ({openModal, onClose, id}) => {
+export const ModalImage: React.FC<IProps> = ({
+  openModal,
+  onClose,
+  id,
+  primary,
+}) => {
   const [image, setImage] = useState<File | undefined>();
   const [preview, setPreview] = useState('');
 
+  const queryClient = useQueryClient();
+
   const {mutate, isLoading} = useMutation(
-    (image: File) => productService.updateImageProduct(id, image),
+    (image: File) => productService.updateImageProduct(id, image, primary),
     {
       onSuccess: () => {
         onClose();
         feedback('Registro atualizado com sucesso', 'success');
+        queryClient.invalidateQueries('products');
       },
       onError: () => {
         feedback('Erro ao atualizar registro', 'error');

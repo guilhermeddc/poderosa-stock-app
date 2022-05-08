@@ -23,6 +23,8 @@ export interface IProduct {
   description: string;
   quantity: number;
   purchaseValue: number;
+  image: string;
+  imageSecondary: string;
   saleValue: number;
   profitValue: number;
   size: string;
@@ -233,7 +235,7 @@ const updateProduct = async (
   }
 };
 
-const updateImageProduct = async (id: string, file: File) => {
+const updateImageProduct = async (id: string, file: File, primary: boolean) => {
   try {
     const storageRef = ref(storage, `products/${id}`);
 
@@ -241,9 +243,9 @@ const updateImageProduct = async (id: string, file: File) => {
 
     const downloadURL = await getDownloadURL(storageRef);
 
-    await updateDoc(doc(productDB, id), {
-      image: downloadURL,
-    });
+    primary
+      ? await updateDoc(doc(productDB, id), {image: downloadURL})
+      : await updateDoc(doc(productDB, id), {secondaryImage: downloadURL});
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;

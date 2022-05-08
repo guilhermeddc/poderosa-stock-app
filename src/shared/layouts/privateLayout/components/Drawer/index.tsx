@@ -210,7 +210,7 @@ export const Drawer: React.FC<IProps> = ({
                     duration: theme.transitions.duration.leavingScreen,
                   }),
               overflowX: 'hidden',
-              [theme.breakpoints.only('xs')]: {
+              [theme.breakpoints.down('md')]: {
                 width: drawerOpen ? drawerWidth : 0,
                 p: !drawerOpen ? 0 : 1,
                 maxWidth: drawerOpen ? drawerWidth : 0,
