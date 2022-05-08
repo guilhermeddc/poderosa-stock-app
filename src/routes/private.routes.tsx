@@ -1,11 +1,5 @@
-import React, {lazy, Suspense, useEffect} from 'react';
-import {
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom';
+import React, {lazy, Suspense} from 'react';
+import {Routes, Route, Navigate} from 'react-router-dom';
 
 import {LinearDeterminate} from 'shared/components';
 import {PrivateLayout} from 'shared/layouts';
@@ -23,13 +17,6 @@ const Shoppings = lazy(() => import('pages/private/Shoppings'));
 const Movements = lazy(() => import('pages/private/Movements'));
 
 export const PrivateRoutes: React.FC = () => {
-  const navigate = useNavigate();
-  const {pathname} = useLocation();
-
-  useEffect(() => {
-    if (pathname === '/login') navigate('/');
-  }, [pathname, navigate]);
-
   return (
     <PrivateLayout>
       <Suspense fallback={<LinearDeterminate />}>
@@ -46,7 +33,7 @@ export const PrivateRoutes: React.FC = () => {
           <Route path="shopping" element={<Shoppings />} />
           <Route path="movimentos" element={<Movements />} />
 
-          <Route path="*" element={() => <Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </PrivateLayout>

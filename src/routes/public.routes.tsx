@@ -1,5 +1,5 @@
 import React, {lazy, Suspense, useEffect} from 'react';
-import {Routes, Route, useNavigate} from 'react-router-dom';
+import {Routes, Route, useNavigate, Navigate} from 'react-router-dom';
 
 import {LinearDeterminate} from 'shared/components';
 import {useAuth} from 'shared/hooks';
@@ -23,6 +23,8 @@ export const PublicRoutes: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </PublicLayout>

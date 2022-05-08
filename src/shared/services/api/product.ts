@@ -243,9 +243,11 @@ const updateImageProduct = async (id: string, file: File, primary: boolean) => {
 
     const downloadURL = await getDownloadURL(storageRef);
 
+    const imageReplaced = downloadURL.replace('?alt', '_500x600?alt');
+
     primary
-      ? await updateDoc(doc(productDB, id), {image: downloadURL})
-      : await updateDoc(doc(productDB, id), {secondaryImage: downloadURL});
+      ? await updateDoc(doc(productDB, id), {image: imageReplaced})
+      : await updateDoc(doc(productDB, id), {secondaryImage: imageReplaced});
   } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
